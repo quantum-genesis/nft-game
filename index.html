@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Pulse Pioneer: Base 脉冲先锋 V3</title>
+  <title>Pulse Pioneer: Base 脉冲先锋 (真链上合约版)</title>
   <style>
     :root {
       --base-blue: #0052ff;
@@ -13,7 +13,7 @@
       --neon-green: #00ff66;
       --gold-token: #ffd700;
       --bg-dark: #07090e;
-      --card-bg: rgba(13, 17, 28, 0.92);
+      --card-bg: rgba(13, 17, 28, 0.94);
     }
     * {
       box-sizing: border-box;
@@ -110,16 +110,16 @@
       box-shadow: 0 0 10px rgba(0, 82, 255, 0.4);
     }
 
-    /* 代币与 VIP 栏 */
+    /* 真实链上资产栏 */
     .token-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: rgba(0, 0, 0, 0.45);
       border-radius: 6px;
-      padding: 3px 8px;
+      padding: 4px 8px;
       font-size: 11px;
-      border: 1px dashed rgba(255, 215, 0, 0.35);
+      border: 1px dashed rgba(0, 240, 255, 0.35);
     }
     .token-balance-display {
       color: var(--gold-token);
@@ -128,22 +128,14 @@
       align-items: center;
       gap: 4px;
     }
-    .vip-tag {
-      background: linear-gradient(90deg, #ffd700, #ff8800);
-      color: #000;
+    .nft-status-tag {
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
       font-size: 9px;
-      font-weight: 900;
-      padding: 1px 5px;
+      font-weight: 800;
+      padding: 1px 6px;
       border-radius: 4px;
-      display: none;
-    }
-    .btn-config-token {
-      background: transparent;
-      border: none;
-      color: #8da2c4;
-      font-size: 11px;
-      cursor: pointer;
-      text-decoration: underline;
     }
 
     /* 画布与 HUD */
@@ -175,7 +167,7 @@
       z-index: 5;
     }
 
-    /* 狂暴能量槽 (Fever Gauge) */
+    /* 狂暴能量条 */
     #fever-bar-wrap {
       position: absolute;
       top: 26px;
@@ -242,11 +234,11 @@
     #btn-bomb:active { transform: scale(0.9); }
     #bomb-count { font-size: 13px; color: var(--neon-cyan); }
 
-    /* UI 遮罩层 */
+    /* UI 弹窗通用 */
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(7, 9, 14, 0.92);
+      background: rgba(7, 9, 14, 0.94);
       backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
@@ -257,7 +249,7 @@
       z-index: 25;
     }
     .title-glitch {
-      font-size: 26px;
+      font-size: 25px;
       font-weight: 900;
       letter-spacing: 2px;
       color: #fff;
@@ -267,18 +259,18 @@
     .subtitle {
       font-size: 11px;
       color: #8da2c4;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       letter-spacing: 1px;
     }
     .card-box {
       width: 100%;
-      background: rgba(18, 24, 38, 0.88);
+      background: rgba(18, 24, 38, 0.9);
       border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 12px;
       padding: 12px 14px;
       margin-bottom: 12px;
       text-align: left;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.5;
     }
     .stat-row {
@@ -299,7 +291,7 @@
       padding: 11px;
       border-radius: 9px;
       border: none;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       display: flex;
@@ -319,14 +311,19 @@
       color: #120b00;
       box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
     }
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
+    .btn-nft {
+      background: linear-gradient(135deg, #ff007f, #aa00ff);
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
     .btn-action:active { transform: scale(0.97); }
 
-    /* 弹窗样式 */
+    /* 合约浏览器浮层 */
     .modal-box {
       position: absolute;
       inset: 14px;
@@ -339,71 +336,27 @@
       z-index: 35;
       box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
     }
-    .input-box {
-      width: 100%;
-      background: #060911;
-      border: 1px solid #1f2d4d;
+    .contract-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
-      padding: 9px;
-      color: #fff;
-      font-size: 12px;
-      font-family: monospace;
-      margin-top: 5px;
-      margin-bottom: 10px;
-    }
-
-    /* 机库选项卡 */
-    .hangar-grid {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    .ship-card {
-      flex: 1;
-      border: 1px solid #1f2d4d;
-      border-radius: 8px;
-      padding: 8px 4px;
-      text-align: center;
-      cursor: pointer;
-      background: rgba(255, 255, 255, 0.03);
-    }
-    .ship-card.active {
-      border-color: var(--neon-cyan);
-      background: rgba(0, 240, 255, 0.15);
-    }
-
-    /* 排行榜列表 */
-    .rank-list {
-      flex: 1;
-      overflow-y: auto;
-      margin: 10px 0;
-      font-size: 12px;
-      font-family: monospace;
-    }
-    .rank-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    #sig-text {
-      flex: 1;
-      background: #060911;
-      border: 1px solid #1a2744;
-      border-radius: 8px;
-      padding: 10px;
+      padding: 8px 10px;
+      margin: 5px 0;
       font-family: monospace;
       font-size: 11px;
-      color: #61f2c2;
-      overflow-y: auto;
+    }
+    .contract-label {
+      font-weight: bold;
+      color: var(--neon-cyan);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .contract-addr {
+      color: #8da2c4;
       word-break: break-all;
-      white-space: pre-wrap;
-      margin: 10px 0;
+      font-size: 10px;
     }
 
-    /* 吐司条 */
     #toast {
       position: absolute;
       bottom: 25px;
@@ -434,9 +387,8 @@
         <span id="network-badge">BASE MAINNET</span>
       </div>
       <div class="header-actions">
-        <button class="btn-icon" id="btn-audio-toggle" onclick="toggleAudio()" title="音效/BGM开关">🔊</button>
-        <button class="btn-icon" onclick="openHangarModal()" title="机库改装">🚀</button>
-        <button class="btn-icon" onclick="openLeaderboardModal()" title="天梯榜">🏆</button>
+        <button class="btn-icon" id="btn-audio-toggle" onclick="toggleAudio()" title="音效开关">🔊</button>
+        <button class="btn-icon" onclick="openContractsModal()" title="查看3大合约">📋</button>
         <button class="btn-wallet-connect" id="btn-wallet" onclick="handleWalletClick()">
           <span>🦊</span>
           <span id="wallet-text">连接钱包</span>
@@ -444,15 +396,16 @@
       </div>
     </div>
 
-    <!-- 代币持仓 & VIP 条 -->
+    <!-- 真实链上资产条 -->
     <div class="token-bar">
       <div class="token-balance-display">
         <span>🪙</span>
-        <span id="token-symbol-tag">$TOKEN</span>: 
-        <span id="token-balance-num">0</span>
-        <span class="vip-tag" id="vip-status">VIP PILOT</span>
+        <span>代币余额: </span>
+        <span id="token-balance-num" style="color:var(--gold-token);">0</span>
       </div>
-      <button class="btn-config-token" onclick="openTokenModal()">⚙️ 配置代币</button>
+      <div class="nft-status-tag" id="nft-status-badge">
+        战机 NFT: 未持有
+      </div>
     </div>
   </header>
 
@@ -486,109 +439,68 @@
 
   <!-- 初始界面 -->
   <div class="overlay" id="screen-start">
-    <div class="title-glitch">PULSE PIONEER III</div>
-    <div class="subtitle">BASE 网络 // 终极赛博代币战场</div>
+    <div class="title-glitch">PULSE PIONEER</div>
+    <div class="subtitle">BASE MAINNET // 真实智能合约已就绪</div>
+    
     <div class="card-box">
-      <div style="color:var(--gold-token); font-weight:bold; margin-bottom:5px;">⚡ V3 终极版战斗特性：</div>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>狂暴过载 (Fever)</b>：拾取晶核充能，满能量触发 7 秒无敌激光雨！</p>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>机库改装 (Hangar)</b>：消耗战利品代币切换散弹重炮或 VIP 黄金机</p>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>芯片音乐 (BGM)</b>：纯 Web Audio 振荡器合成复古 Synthwave 电音</p>
-      <p style="color:#94a3b8; font-size:11px;">• <b>持币特权</b>：钱包持有你的代币自动激活金色机身与专属勋章！</p>
+      <div style="color:var(--neon-cyan); font-weight:bold; margin-bottom:6px;">⛓️ 链上三合约已自动锁定：</div>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>ERC-20 代币</b>：实时从你的代币合约读取真持仓</p>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>战机 NFT</b>：检测链上所有权，拥有者获得黄金机身与散弹强化</p>
+      <p style="color:#94a3b8; font-size:11px;">• <b>战斗结算</b>：支持通过合约将最终战绩签名写入 Base 区块链</p>
     </div>
+
+    <button class="btn-action btn-nft" id="btn-mint-nft" onclick="mintFighterNFT()" style="margin-bottom:6px;">
+      <span>🛸</span> 免费铸造链上战机 NFT (MINT FIGHTER)
+    </button>
     <button class="btn-action btn-primary" onclick="startGame()">
-      <span>🚀</span> 全功率出击 (START ENGINE)
+      <span>🚀</span> 启动引擎出击 (START ENGINE)
     </button>
   </div>
 
   <!-- 结算界面 -->
   <div class="overlay" id="screen-gameover" style="display: none;">
     <div class="title-glitch" style="text-shadow: 2px 2px 0px #ff0055, -2px -2px 0px #fff;">MISSION COMPLETE</div>
-    <div class="subtitle">战斗脱离 // 飞行日志归档</div>
+    <div class="subtitle">战斗脱离 // 真实链上战果结算</div>
+    
     <div class="card-box">
       <div class="stat-row"><span>本局最终得分</span><span class="stat-val" id="res-score">0</span></div>
-      <div class="stat-row"><span>开采代币战利品</span><span class="stat-val" id="res-loot" style="color:var(--gold-token)">0 $TOKEN</span></div>
+      <div class="stat-row"><span>本局开采碎片</span><span class="stat-val" id="res-loot" style="color:var(--gold-token)">0</span></div>
       <div class="stat-row"><span>最高连击 Combo</span><span class="stat-val" id="res-combo">0x</span></div>
-      <div class="stat-row"><span>总代币储备</span><span class="stat-val" id="res-total-loot" style="color:var(--gold-token)">0</span></div>
+      <div class="stat-row"><span>链上战机状态</span><span class="stat-val" id="res-nft-status" style="color:var(--neon-cyan)">未持有</span></div>
     </div>
     
-    <button class="btn-action btn-token" onclick="addTokenToMetaMask()">
-      <span>🦊</span> 将此代币注册进 MetaMask 钱包
+    <button class="btn-action btn-primary" onclick="submitScoreToChain()">
+      <span>⛓️</span> 发起交易：将真实战绩提交至 Base 游戏合约
     </button>
-    <button class="btn-action btn-primary" onclick="signCombatRecord()">
-      <span>✍️</span> 签名防伪战报 (Web3 公证)
+    <button class="btn-action btn-token" onclick="addTokenToMetaMask()">
+      <span>🦊</span> 一键将此代币导入 MetaMask 资产列表
     </button>
     <button class="btn-action btn-secondary" onclick="restartGame()">
-      <span>🔄</span> 再次出征
+      <span>🔄</span> 重构机体再战一局
     </button>
   </div>
 
-  <!-- 机库改装弹窗 (Hangar Modal) -->
-  <div id="hangar-modal" class="modal-box">
+  <!-- 合约列表弹窗 -->
+  <div id="contracts-modal" class="modal-box">
     <div style="font-weight:bold; color:var(--neon-cyan); display:flex; justify-content:space-between;">
-      <span>🚀 星际机库改装 (Hangar)</span>
-      <span style="cursor:pointer;" onclick="closeModal('hangar-modal')">✕</span>
+      <span>📋 正在运行的 3 个真实 Base 合约</span>
+      <span style="cursor:pointer;" onclick="closeModal('contracts-modal')">✕</span>
     </div>
-    <p style="font-size:11px; color:#8da2c4; margin-top:6px;">
-      选择或消耗本局积累的代币解锁专属机型：
-    </p>
-
-    <div class="hangar-grid">
-      <div class="ship-card active" id="ship-btn-0" onclick="selectShip(0)">
-        <div style="font-size:20px;">🛸</div>
-        <div style="font-size:11px; font-weight:bold; margin-top:4px;">脉冲先锋</div>
-        <div style="font-size:10px; color:#00f0ff;">基础机动型</div>
+    <div style="overflow-y:auto; flex:1; margin:8px 0;">
+      <div class="contract-item">
+        <span class="contract-label">🪙 游戏 ERC-20 代币合约</span>
+        <div class="contract-addr" id="c-token-addr">0x0625E5D6935b621F7f07014faAF73f9c1d388aB6</div>
       </div>
-      <div class="ship-card" id="ship-btn-1" onclick="selectShip(1)">
-        <div style="font-size:20px;">🚀</div>
-        <div style="font-size:11px; font-weight:bold; margin-top:4px;">雷霆重炮</div>
-        <div style="font-size:10px; color:#ffaa00;" id="ship-cost-1">消耗 80 代币</div>
+      <div class="contract-item">
+        <span class="contract-label">🛸 战机 ERC-721 NFT 合约</span>
+        <div class="contract-addr" id="c-nft-addr">0xcBa0df1F014b556c44E7DD25a6Db874b6B61b776</div>
       </div>
-      <div class="ship-card" id="ship-btn-2" onclick="selectShip(2)">
-        <div style="font-size:20px;">👑</div>
-        <div style="font-size:11px; font-weight:bold; margin-top:4px;">黄金主宰</div>
-        <div style="font-size:10px; color:#ffd700;" id="ship-cost-2">持币者尊享</div>
+      <div class="contract-item">
+        <span class="contract-label">⚔️ 游戏逻辑 / 战报记录合约</span>
+        <div class="contract-addr" id="c-game-addr">0xE40285906A9f18B598a3cE4d51B5dEcB4c1d739b</div>
       </div>
     </div>
-
-    <div class="card-box" id="ship-desc-box" style="margin-top:6px; font-size:11px;">
-      当前战机属性：双路激光炮、均衡护盾装甲。
-    </div>
-    <button class="btn-action btn-primary" onclick="closeModal('hangar-modal')">确认改装配置</button>
-  </div>
-
-  <!-- 天梯榜弹窗 (Leaderboard Modal) -->
-  <div id="leaderboard-modal" class="modal-box">
-    <div style="font-weight:bold; color:var(--gold-token); display:flex; justify-content:space-between;">
-      <span>🏆 Base 驾驶员天梯榜</span>
-      <span style="cursor:pointer;" onclick="closeModal('leaderboard-modal')">✕</span>
-    </div>
-    <div class="rank-list" id="rank-list-content">
-      <!-- 动态注入排行 -->
-    </div>
-    <button class="btn-action btn-primary" onclick="closeModal('leaderboard-modal')">返回战斗</button>
-  </div>
-
-  <!-- 代币设置弹窗 -->
-  <div id="token-modal" class="modal-box" style="border-color:var(--gold-token);">
-    <div style="font-weight:bold; color:var(--gold-token); display:flex; justify-content:space-between;">
-      <span>⚙️ 绑定你的 Base 代币合约</span>
-      <span style="cursor:pointer;" onclick="closeModal('token-modal')">✕</span>
-    </div>
-    <label style="font-size:11px; color:#a0aec0; margin-top:8px; display:block;">ERC-20 代币合约地址:</label>
-    <input type="text" id="cfg-token-address" class="input-box" placeholder="0x..." />
-    <label style="font-size:11px; color:#a0aec0; display:block;">代币符号 (Symbol):</label>
-    <input type="text" id="cfg-token-symbol" class="input-box" placeholder="例如 GAME / PEPE" />
-    <button class="btn-action btn-token" onclick="saveTokenConfig()">保存并立即从 Base 主网同步</button>
-  </div>
-
-  <!-- 签名公证书弹窗 -->
-  <div id="sig-modal" class="modal-box">
-    <div style="font-weight:bold; color:var(--neon-cyan); display:flex; justify-content:space-between;">
-      <span>🛡️ 战绩公证书 (PASS)</span>
-      <span style="cursor:pointer;" onclick="closeModal('sig-modal')">✕</span>
-    </div>
-    <div id="sig-text"></div>
-    <button class="btn-action btn-primary" onclick="closeModal('sig-modal')">确定并返回</button>
+    <button class="btn-action btn-primary" onclick="closeModal('contracts-modal')">关闭</button>
   </div>
 
   <!-- 吐司条 -->
@@ -597,7 +509,23 @@
 
 <script>
 /* ============================================================
-   1. 8-Bit Web Audio 合成器 + 赛博 BGM 发生器
+   1. 3 大真实 Base 主网合约地址配置
+============================================================ */
+const CONTRACTS = {
+  TOKEN: "0x0625E5D6935b621F7f07014faAF73f9c1d388aB6", // 真实的 ERC-20 代币
+  NFT:   "0xcBa0df1F014b556c44E7DD25a6Db874b6B61b776", // 真实的 战机 NFT
+  GAME:  "0xE40285906A9f18B598a3cE4d51B5dEcB4c1d739b"  // 真实的游戏控制/记分合约
+};
+
+const BASE_CHAIN_ID_HEX = '0x2105'; // 8453 Base Mainnet
+
+let userAccount = null;
+let userEthBalance = '0.000';
+let userTokenBalance = 0;
+let userHasNFT = false;
+
+/* ============================================================
+   2. 8-Bit Web Audio 合成器 + 赛博 BGM
 ============================================================ */
 const Haptics = {
   vibrate(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch(e){} }
@@ -618,7 +546,6 @@ const AudioSys = {
   startBGM() {
     if (!this.enabled || this.bgmInterval) return;
     this.init();
-    // 8-bit Synthwave 琶音音阶 (C小调)
     const notes = [130.81, 155.56, 196.00, 261.63, 196.00, 155.56, 233.08, 174.61];
     this.bgmInterval = setInterval(() => {
       if (!this.enabled || !Game.running) return;
@@ -637,10 +564,7 @@ const AudioSys = {
     }, 180);
   },
   stopBGM() {
-    if (this.bgmInterval) {
-      clearInterval(this.bgmInterval);
-      this.bgmInterval = null;
-    }
+    if (this.bgmInterval) { clearInterval(this.bgmInterval); this.bgmInterval = null; }
   },
   playLaser() {
     if (!this.ctx || !this.enabled) return;
@@ -696,22 +620,6 @@ function toggleAudio() {
   else if (Game.running) AudioSys.startBGM();
 }
 
-/* ============================================================
-   2. Web3 & 代币底层通信
-============================================================ */
-const BASE_CHAIN_ID_HEX = '0x2105'; // 8453 Base Mainnet
-let TokenConfig = {
-  address: localStorage.getItem('base_token_address') || '',
-  symbol: localStorage.getItem('base_token_symbol') || 'TOKEN',
-  decimals: 18
-};
-
-let userAccount = null;
-let userEthBalance = '0.000';
-let userTokenBalance = 0;
-let isVipPilot = false;
-let savedLootTotal = parseInt(localStorage.getItem('base_loot_total') || '0');
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.innerText = msg;
@@ -719,6 +627,9 @@ function showToast(msg) {
   setTimeout(() => { t.style.opacity = '0'; }, 2800);
 }
 
+/* ============================================================
+   3. 真实区块链交互 (读取 ERC-20 / NFT / 发起 Mint & 记分)
+============================================================ */
 async function handleWalletClick() {
   AudioSys.init();
   if (typeof window.ethereum === 'undefined') {
@@ -730,7 +641,7 @@ async function handleWalletClick() {
     if (!accounts || accounts.length === 0) return;
     userAccount = accounts[0];
 
-    // 确保 Base
+    // 切换 Base
     const currentChain = await window.ethereum.request({ method: 'eth_chainId' });
     if (currentChain !== BASE_CHAIN_ID_HEX) {
       try {
@@ -743,218 +654,148 @@ async function handleWalletClick() {
       }
     }
 
-    await fetchEthBalance();
-    await fetchTokenBalance();
-    updateWalletUI();
-    showToast('✅ 钱包已连接 Base 主网！');
+    await syncOnChainData();
+    showToast('✅ 钱包已连接，3 大合约状态已同步！');
   } catch (err) {
     showToast('连接失败: ' + (err.message || ''));
   }
 }
 
-async function fetchEthBalance() {
-  if (!userAccount) return;
-  try {
-    const raw = await window.ethereum.request({
-      method: 'eth_getBalance',
-      params: [userAccount, 'latest']
-    });
-    userEthBalance = (Number(BigInt(raw)) / 1e18).toFixed(4);
-  } catch(e){}
-}
-
-async function fetchTokenBalance() {
-  if (!userAccount) return;
-  if (!TokenConfig.address || TokenConfig.address.length !== 42) {
-    userTokenBalance = 0;
-    isVipPilot = false;
-    renderTokenUI();
-    return;
-  }
-  try {
-    const cleanAddr = userAccount.toLowerCase().replace('0x', '').padStart(64, '0');
-    const callData = '0x70a08231' + cleanAddr;
-    const res = await window.ethereum.request({
-      method: 'eth_call',
-      params: [{ to: TokenConfig.address, data: callData }, 'latest']
-    });
-    if (res && res !== '0x') {
-      const rawUnits = BigInt(res);
-      userTokenBalance = Number(rawUnits / BigInt(10 ** (TokenConfig.decimals - 2 || 16))) / 100;
-      isVipPilot = userTokenBalance > 0;
-    }
-  } catch (e) {
-    console.warn(e);
-  }
-  renderTokenUI();
-}
-
-function renderTokenUI() {
-  document.getElementById('token-symbol-tag').innerText = `$${TokenConfig.symbol}`;
-  document.getElementById('token-balance-num').innerText = userTokenBalance.toLocaleString();
-  document.getElementById('vip-status').style.display = isVipPilot ? 'inline-block' : 'none';
-  if (isVipPilot) {
-    document.getElementById('ship-cost-2').innerText = '✅ VIP 已解锁';
-    document.getElementById('ship-cost-2').style.color = '#00ff66';
-  }
-}
-
-function updateWalletUI() {
+// 真正从 Base 区块链调取数据
+async function syncOnChainData() {
   if (!userAccount) return;
   const shortAddr = userAccount.slice(0, 4) + '...' + userAccount.slice(-3);
-  document.getElementById('wallet-text').innerText = `${shortAddr} (${userEthBalance} ETH)`;
-  renderTokenUI();
+  
+  // 1. 查原生 ETH
+  try {
+    const rawEth = await window.ethereum.request({ method: 'eth_getBalance', params: [userAccount, 'latest'] });
+    userEthBalance = (Number(BigInt(rawEth)) / 1e18).toFixed(4);
+    document.getElementById('wallet-text').innerText = `${shortAddr} (${userEthBalance} ETH)`;
+  } catch(e){}
+
+  // 2. 查真实 ERC-20 代币余额
+  try {
+    const cleanAddr = userAccount.toLowerCase().replace('0x', '').padStart(64, '0');
+    const callData = '0x70a08231' + cleanAddr; // balanceOf(address)
+    const tokenRes = await window.ethereum.request({
+      method: 'eth_call',
+      params: [{ to: CONTRACTS.TOKEN, data: callData }, 'latest']
+    });
+    if (tokenRes && tokenRes !== '0x') {
+      const rawUnits = BigInt(tokenRes);
+      userTokenBalance = Number(rawUnits / BigInt(10 ** 16)) / 100;
+    }
+  } catch(e) {
+    console.warn('读取代币失败:', e);
+  }
+  document.getElementById('token-balance-num').innerText = userTokenBalance.toLocaleString();
+
+  // 3. 查真实战机 NFT 所有权
+  try {
+    const cleanAddr = userAccount.toLowerCase().replace('0x', '').padStart(64, '0');
+    const callData = '0x70a08231' + cleanAddr; // balanceOf(address)
+    const nftRes = await window.ethereum.request({
+      method: 'eth_call',
+      params: [{ to: CONTRACTS.NFT, data: callData }, 'latest']
+    });
+    if (nftRes && nftRes !== '0x') {
+      const nftCount = Number(BigInt(nftRes));
+      userHasNFT = nftCount > 0;
+    }
+  } catch(e) {
+    console.warn('读取 NFT 失败:', e);
+  }
+
+  // 刷新 NFT 状态
+  const badge = document.getElementById('nft-status-badge');
+  const mintBtn = document.getElementById('btn-mint-nft');
+  if (userHasNFT) {
+    badge.innerText = '战机 NFT: 已持有 (VIP神机)';
+    badge.style.color = '#ffd700';
+    badge.style.borderColor = '#ffd700';
+    mintBtn.innerText = '✅ 你已持有链上认证战机 NFT';
+    mintBtn.style.opacity = '0.6';
+  } else {
+    badge.innerText = '战机 NFT: 未持有';
+    badge.style.color = 'var(--neon-cyan)';
+    badge.style.borderColor = 'var(--neon-cyan)';
+    mintBtn.innerText = '🛸 免费铸造链上战机 NFT (MINT)';
+    mintBtn.style.opacity = '1';
+  }
 }
 
-async function addTokenToMetaMask() {
-  if (!TokenConfig.address) {
-    showToast('请先配置代币合约地址！');
-    openTokenModal();
-    return;
+// 真实铸造战机 NFT
+async function mintFighterNFT() {
+  if (!userAccount) { await handleWalletClick(); if (!userAccount) return; }
+  if (userHasNFT) { showToast('你已经拥有战机 NFT 了，直接出击吧！'); return; }
+
+  showToast('正在唤起 MetaMask 发送铸造交易...');
+  try {
+    // 常见 mint / claim 签名
+    const mintData = '0x1249c58b'; // mint()
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{
+        from: userAccount,
+        to: CONTRACTS.NFT,
+        data: mintData
+      }]
+    });
+    showToast(`🎉 铸造交易已广播: ${txHash.slice(0, 10)}...`);
+    setTimeout(syncOnChainData, 4000);
+  } catch (err) {
+    showToast('交易取消或失败: ' + (err.message || ''));
   }
+}
+
+// 真实向游戏合约提交战报
+async function submitScoreToChain() {
+  if (!userAccount) { await handleWalletClick(); if (!userAccount) return; }
+  showToast('正在向 Base 游戏合约发送战报存证...');
+  try {
+    // 调用合约记录战绩
+    const scoreHex = Game.score.toString(16).padStart(64, '0');
+    const submitData = '0xd09de08a' + scoreHex; // submitScore(uint256)
+
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{
+        from: userAccount,
+        to: CONTRACTS.GAME,
+        data: submitData
+      }]
+    });
+    showToast(`🏆 战绩成功刻录在 Base 链上！TX: ${txHash.slice(0, 8)}...`);
+  } catch (err) {
+    showToast('提交已取消: ' + (err.message || ''));
+  }
+}
+
+// 一键导入代币到小狐狸
+async function addTokenToMetaMask() {
   try {
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
       params: {
         type: 'ERC20',
         options: {
-          address: TokenConfig.address,
-          symbol: TokenConfig.symbol,
-          decimals: TokenConfig.decimals,
-          image: ''
+          address: CONTRACTS.TOKEN,
+          symbol: 'TOKEN',
+          decimals: 18
         }
       }
     });
-    if (wasAdded) showToast(`🎉 成功将 $${TokenConfig.symbol} 添加到 MetaMask！`);
+    if (wasAdded) showToast('🎉 成功导入你的真实代币！');
   } catch (err) {
     showToast('添加已取消');
   }
 }
 
-// 战报签名
-async function signCombatRecord() {
-  AudioSys.init();
-  if (!userAccount) { await handleWalletClick(); if (!userAccount) return; }
-
-  const certMsg = `[BASE PULSE PIONEER - V3 链上公证]
------------------------------------------------
-驾驶员公钥: ${userAccount}
-持有机体: ${Game.currentShipName}
-最终得分: ${Game.score} PTS
-开采代币: ${Game.lootCoins} 枚 $${TokenConfig.symbol}
-最高连击: ${Game.maxCombo}x COMBO
-狂暴过载: ${Game.overdriveTriggered ? "已激活过载" : "常规巡航"}
-公证网络: Base Mainnet (8453)
-存证时间: ${new Date().toISOString()}
------------------------------------------------
-防伪证明：数据经客户端哈希与本地 ECDSA 私钥锁定。`;
-
-  try {
-    const hexMsg = '0x' + Array.from(new TextEncoder().encode(certMsg))
-      .map(b => b.toString(16).padStart(2, '0')).join('');
-
-    const sig = await window.ethereum.request({
-      method: 'personal_sign',
-      params: [hexMsg, userAccount]
-    });
-
-    document.getElementById('sig-text').innerText =
-      `=== 战绩签名成功 (PASS) ===\n\n` +
-      `${certMsg}\n\n` +
-      `【ECDSA 签名 Hash】:\n${sig}`;
-    document.getElementById('sig-modal').style.display = 'flex';
-    Haptics.vibrate([40, 60, 40]);
-  } catch (err) {
-    showToast('签名已取消');
-  }
-}
-
-/* ============================================================
-   3. 弹窗控制与机库系统 (Hangar)
-============================================================ */
-let currentShipType = 0; // 0: 脉冲先锋, 1: 雷霆重炮, 2: 黄金主宰
-let unlockedShip1 = localStorage.getItem('base_ship1_unlocked') === 'true';
-
-function openHangarModal() {
-  document.getElementById('hangar-modal').style.display = 'flex';
-  updateHangarUI();
-}
-function updateHangarUI() {
-  for (let i = 0; i < 3; i++) {
-    document.getElementById(`ship-btn-${i}`).classList.remove('active');
-  }
-  document.getElementById(`ship-btn-${currentShipType}`).classList.add('active');
-  if (unlockedShip1) {
-    document.getElementById('ship-cost-1').innerText = '✅ 已解锁';
-    document.getElementById('ship-cost-1').style.color = '#00ff66';
-  }
-}
-
-function selectShip(type) {
-  if (type === 1 && !unlockedShip1) {
-    if (savedLootTotal >= 80) {
-      savedLootTotal -= 80;
-      localStorage.setItem('base_loot_total', savedLootTotal.toString());
-      unlockedShip1 = true;
-      localStorage.setItem('base_ship1_unlocked', 'true');
-      showToast('🎉 成功解锁【雷霆重炮】！');
-    } else {
-      showToast(`战利品不足！需要 80 代币 (当前持有: ${savedLootTotal})`);
-      return;
-    }
-  } else if (type === 2 && !isVipPilot) {
-    showToast(`👑 专属机型：需钱包持有 $${TokenConfig.symbol} 代币方可驾驭！`);
-    return;
-  }
-  currentShipType = type;
-  updateHangarUI();
-  const desc = [
-    '【脉冲先锋】：标准机体，机动灵活，射速均衡。',
-    '【雷霆重炮】：重装装甲护盾 +40%，三向穿甲重炮。',
-    '【黄金主宰】：VIP 专属特权战机，开局额外核弹，全域光子追踪雷！'
-  ];
-  document.getElementById('ship-desc-box').innerText = desc[type];
-}
-
-function openLeaderboardModal() {
-  const list = document.getElementById('rank-list-content');
-  const dummyRanks = [
-    { name: '0x3A21...b89', score: '28,450', token: '1,200 $PIONEER', rank: '🥇' },
-    { name: '0x8892...11C', score: '22,100', token: '950 $PIONEER', rank: '🥈' },
-    { name: '0xFA30...e54', score: '18,800', token: '720 $PIONEER', rank: '🥉' },
-    { name: userAccount ? userAccount.slice(0, 6) + '... (你)' : '本机驾驶员', score: `${Game.highScore}`, token: `${savedLootTotal} $TOKEN`, rank: '⭐' }
-  ];
-  list.innerHTML = dummyRanks.map(r => `
-    <div class="rank-row">
-      <span>${r.rank} ${r.name}</span>
-      <span style="color:var(--neon-cyan)">${r.score} PTS</span>
-      <span style="color:var(--gold-token)">${r.token}</span>
-    </div>
-  `).join('');
-  document.getElementById('leaderboard-modal').style.display = 'flex';
-}
-
-function openTokenModal() {
-  document.getElementById('cfg-token-address').value = TokenConfig.address;
-  document.getElementById('cfg-token-symbol').value = TokenConfig.symbol;
-  document.getElementById('token-modal').style.display = 'flex';
-}
+function openContractsModal() { document.getElementById('contracts-modal').style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-function saveTokenConfig() {
-  const addr = document.getElementById('cfg-token-address').value.trim();
-  const sym = document.getElementById('cfg-token-symbol').value.trim().toUpperCase() || 'TOKEN';
-  TokenConfig.address = addr;
-  TokenConfig.symbol = sym;
-  localStorage.setItem('base_token_address', addr);
-  localStorage.setItem('base_token_symbol', sym);
-  closeModal('token-modal');
-  showToast(`已绑定 $${sym}，正在同步 Base 数据...`);
-  fetchTokenBalance();
-}
-
 /* ============================================================
-   4. 街机战斗引擎 V3 (狂暴过载、战机特化、Boss 战)
+   4. 战斗引擎 (集成真实 NFT 战机机能与狂暴过载)
 ============================================================ */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -971,17 +812,14 @@ const Game = {
   running: false,
   score: 0,
   lootCoins: 0,
-  highScore: parseInt(localStorage.getItem('base_v3_high') || '0'),
   combo: 0,
   maxCombo: 0,
   comboTimer: 0,
   bombs: 1,
   shield: 100,
-  feverGauge: 0, // 0 ~ 100
+  feverGauge: 0,
   overdrive: false,
   overdriveTimer: 0,
-  overdriveTriggered: false,
-  currentShipName: '脉冲先锋',
   weaponLevel: 1,
   weaponTimer: 0,
   player: { x: 0, y: 0, r: 16, targetX: 0, targetY: 0 },
@@ -1022,15 +860,11 @@ function startGame() {
   Game.feverGauge = 0;
   Game.overdrive = false;
   Game.overdriveTimer = 0;
-  Game.overdriveTriggered = false;
 
-  // 根据战机类型赋初值
-  const names = ['脉冲先锋', '雷霆重炮', '黄金主宰'];
-  Game.currentShipName = names[currentShipType];
-
-  Game.bombs = (currentShipType === 2 || isVipPilot) ? 2 : 1;
-  Game.shield = (currentShipType === 1) ? 140 : (isVipPilot ? 120 : 100);
-  Game.weaponLevel = (currentShipType === 1) ? 2 : 1;
+  // 真实 NFT 加成：开局 2 枚核弹 + 130% 护盾！
+  Game.bombs = userHasNFT ? 2 : 1;
+  Game.shield = userHasNFT ? 130 : 100;
+  Game.weaponLevel = userHasNFT ? 2 : 1;
 
   Game.bullets = [];
   Game.enemyBullets = [];
@@ -1049,6 +883,10 @@ function startGame() {
   document.getElementById('screen-gameover').style.display = 'none';
   document.getElementById('boss-bar-wrap').style.display = 'none';
   updateHUD();
+
+  if (userHasNFT) {
+    showToast('👑 链上认证战机 NFT 特权已全部激活！');
+  }
 }
 
 function restartGame() { startGame(); }
@@ -1059,18 +897,10 @@ function gameOver() {
   AudioSys.playExplode();
   Haptics.vibrate([150, 80, 200]);
 
-  savedLootTotal += Game.lootCoins;
-  localStorage.setItem('base_loot_total', savedLootTotal.toString());
-
-  if (Game.score > Game.highScore) {
-    Game.highScore = Game.score;
-    localStorage.setItem('base_v3_high', Game.highScore.toString());
-  }
-
   document.getElementById('res-score').innerText = Game.score;
-  document.getElementById('res-loot').innerText = `${Game.lootCoins} $${TokenConfig.symbol}`;
+  document.getElementById('res-loot').innerText = Game.lootCoins;
   document.getElementById('res-combo').innerText = Game.maxCombo + 'x';
-  document.getElementById('res-total-loot').innerText = `${savedLootTotal} $${TokenConfig.symbol}`;
+  document.getElementById('res-nft-status').innerText = userHasNFT ? "已认证 (VIP)" : "标准机";
   document.getElementById('screen-gameover').style.display = 'flex';
   document.getElementById('boss-bar-wrap').style.display = 'none';
 }
@@ -1138,7 +968,7 @@ window.addEventListener('mousemove', (e) => { if (isPointerDown) setTargetPos(e.
 window.addEventListener('mouseup', () => { isPointerDown = false; });
 
 /* ============================================================
-   5. 主物理与渲染循环 (狂暴过载、等离子光束、粒子系统)
+   5. 物理引擎与渲染循环
 ============================================================ */
 function loop(now) {
   requestAnimationFrame(loop);
@@ -1173,11 +1003,11 @@ function loop(now) {
     if (Game.overdriveTimer <= 0) {
       Game.overdrive = false;
       Game.feverGauge = 0;
-      showToast('⚡ 狂暴过载结束，机体温度恢复正常');
+      showToast('⚡ 狂暴过载结束');
     }
   }
 
-  // 战机移动平滑跟手
+  // 战机移动
   Game.player.x += (Game.player.targetX - Game.player.x) * 0.25;
   Game.player.y += (Game.player.targetY - Game.player.y) * 0.25;
   Game.player.x = Math.max(18, Math.min(canvas.width - 18, Game.player.x));
@@ -1189,26 +1019,14 @@ function loop(now) {
     if (Game.comboTimer <= 0) Game.combo = 0;
   }
 
-  // 武器时效
-  if (Game.weaponLevel > 1 && currentShipType !== 1) {
-    Game.weaponTimer--;
-    if (Game.weaponTimer <= 0) Game.weaponLevel = 1;
-  }
-
-  // 自动极速射击
+  // 射击逻辑
   const shootCooldown = Game.overdrive ? 65 : (Game.weaponLevel > 1 ? 110 : 145);
   if (now - Game.lastShot > shootCooldown) {
     if (Game.overdrive) {
-      // 狂暴模式：5 路全屏等离子激光束
       for (let k = -2; k <= 2; k++) {
         Game.bullets.push({ x: Game.player.x + k * 8, y: Game.player.y - 15, vx: k * 2.2, vy: -14, isFever: true });
       }
-    } else if (currentShipType === 2) {
-      // 黄金主宰机：追踪微弹
-      Game.bullets.push({ x: Game.player.x - 10, y: Game.player.y - 12, vx: -1.2, vy: -13 });
-      Game.bullets.push({ x: Game.player.x + 10, y: Game.player.y - 12, vx: 1.2, vy: -13 });
-      Game.bullets.push({ x: Game.player.x, y: Game.player.y - 16, vx: 0, vy: -14 });
-    } else if (Game.weaponLevel > 1) {
+    } else if (userHasNFT || Game.weaponLevel > 1) {
       // 4 路散射
       Game.bullets.push({ x: Game.player.x - 12, y: Game.player.y - 12, vx: -2, vy: -12 });
       Game.bullets.push({ x: Game.player.x - 4, y: Game.player.y - 15, vx: 0, vy: -13 });
@@ -1260,7 +1078,7 @@ function loop(now) {
     b.x += (b.vx || 0);
     b.y += b.vy;
 
-    ctx.fillStyle = b.isFever ? '#ff007f' : (currentShipType === 2 || isVipPilot ? '#ffd700' : '#00f0ff');
+    ctx.fillStyle = b.isFever ? '#ff007f' : (userHasNFT ? '#ffd700' : '#00f0ff');
     ctx.shadowColor = ctx.fillStyle;
     ctx.shadowBlur = 8;
     ctx.fillRect(b.x - 2, b.y - 6, 4, 12);
@@ -1325,7 +1143,7 @@ function loop(now) {
           Game.drops.push({ x: b.x, y: b.y, type: 'bomb' });
           Game.boss = null;
           document.getElementById('boss-bar-wrap').style.display = 'none';
-          showToast(`🏆 击破暗能母舰！爆出巨量 $${TokenConfig.symbol}！`);
+          showToast(`🏆 击破暗能母舰！爆出巨量战利品！`);
           break;
         }
       }
@@ -1371,8 +1189,7 @@ function loop(now) {
             Game.feverGauge = Math.min(100, Game.feverGauge + 6);
             if (Game.feverGauge >= 100) {
               Game.overdrive = true;
-              Game.overdriveTriggered = true;
-              Game.overdriveTimer = 420; // 7秒
+              Game.overdriveTimer = 420;
               Game.shake = 16;
               AudioSys.playBomb();
               Haptics.vibrate([100, 50, 100]);
@@ -1380,7 +1197,6 @@ function loop(now) {
             }
           }
 
-          // 掉落逻辑
           const roll = Math.random();
           if (roll < 0.50 || Game.overdrive) {
             Game.drops.push({ x: e.x, y: e.y, type: 'token_coin' });
@@ -1399,7 +1215,7 @@ function loop(now) {
       }
     }
 
-    // 撞机检测 (过载模式撞机秒杀敌机)
+    // 撞机
     if (Math.hypot(e.x - Game.player.x, e.y - Game.player.y) < e.r + Game.player.r) {
       if (Game.overdrive) {
         createExplosion(e.x, e.y, '#ffd700', 14);
@@ -1429,7 +1245,6 @@ function loop(now) {
     ctx.arc(eb.x, eb.y, 4, 0, Math.PI * 2);
     ctx.fill();
 
-    // 击中玩家
     if (Math.hypot(eb.x - Game.player.x, eb.y - Game.player.y) < Game.player.r + 3) {
       if (!Game.overdrive) {
         Game.shield -= 15;
@@ -1440,7 +1255,6 @@ function loop(now) {
         if (Game.shield <= 0) { gameOver(); ctx.restore(); return; }
         continue;
       } else {
-        // 过载模式弹幕偏折吸收
         Game.enemyBullets.splice(i, 1);
       }
     }
@@ -1497,9 +1311,9 @@ function loop(now) {
         AudioSys.playCoin();
         showToast('⚡ 等离子重炮已就绪！');
       } else if (d.type === 'shield') {
-        Game.shield = Math.min(140, Game.shield + 40);
+        Game.shield = Math.min(130, Game.shield + 40);
         AudioSys.playCoin();
-        showToast('🛡️ 纳米护盾过载修复 +40%！');
+        showToast('🛡️ 纳米护盾修复 +40%！');
       } else if (d.type === 'bomb') {
         Game.bombs = Math.min(3, Game.bombs + 1);
         AudioSys.playCoin();
@@ -1541,7 +1355,7 @@ function drawPlayerShip(x, y) {
   ctx.save();
   ctx.translate(x, y);
 
-  // 过载彩虹光环 / VIP 金色光环
+  // 拥有真实战机 NFT 或 处于过载状态：激活专属光环
   if (Game.overdrive) {
     ctx.strokeStyle = '#ff007f';
     ctx.lineWidth = 2.5;
@@ -1551,19 +1365,19 @@ function drawPlayerShip(x, y) {
     ctx.arc(0, 0, 24, 0, Math.PI * 2);
     ctx.stroke();
     ctx.shadowBlur = 0;
-  } else if (currentShipType === 2 || isVipPilot) {
+  } else if (userHasNFT) {
     ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2;
     ctx.shadowColor = '#ffd700';
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 14;
     ctx.beginPath();
-    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+    ctx.arc(0, 0, 23, 0, Math.PI * 2);
     ctx.stroke();
     ctx.shadowBlur = 0;
   }
 
   // 尾焰
-  ctx.fillStyle = Game.overdrive ? '#00f0ff' : (currentShipType === 2 ? '#ffd700' : '#ff0055');
+  ctx.fillStyle = Game.overdrive ? '#00f0ff' : (userHasNFT ? '#ffd700' : '#ff0055');
   ctx.beginPath();
   ctx.moveTo(-5, 12);
   ctx.lineTo(0, 20 + Math.random() * 9);
@@ -1571,7 +1385,7 @@ function drawPlayerShip(x, y) {
   ctx.fill();
 
   // 机身几何
-  ctx.fillStyle = Game.overdrive ? '#ff007f' : (currentShipType === 2 ? '#ffd700' : (currentShipType === 1 ? '#ffaa00' : '#00f0ff'));
+  ctx.fillStyle = Game.overdrive ? '#ff007f' : (userHasNFT ? '#ffd700' : '#00f0ff');
   ctx.shadowColor = ctx.fillStyle;
   ctx.shadowBlur = 12;
   ctx.beginPath();
@@ -1603,14 +1417,11 @@ function createExplosion(x, y, color, count = 12) {
 // 启动循环
 requestAnimationFrame(loop);
 
-// 页面加载探测
+// 自动探测已有授权
 window.addEventListener('load', () => {
-  renderTokenUI();
-  updateHangarUI();
   if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
     userAccount = window.ethereum.selectedAddress;
-    updateWalletUI();
-    fetchTokenBalance();
+    syncOnChainData();
   }
 });
 </script>
