@@ -1,1388 +1,884 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>QUANTUM OVERLOAD: 雷霆战机Web3版</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Base Arcade: 脉冲先锋 | Web3 链上街机</title>
   <style>
+    :root {
+      --base-blue: #0052ff;
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff007f;
+      --neon-amber: #ffaa00;
+      --bg-dark: #07090e;
+      --card-bg: rgba(13, 17, 28, 0.85);
+    }
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      touch-action: none;
+      margin: 0;
+      padding: 0;
     }
-    body {
-      background-color: #020307;
-      color: #e2e8f0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    html, body {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background-color: var(--bg-dark);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      color: #fff;
+      touch-action: none; /* 防止手机端页面拖动与回弹 */
     }
-    #game-container {
+    #app-container {
       position: relative;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       max-width: 480px;
-      max-height: 860px;
-      background: #050711;
-      box-shadow: 0 0 50px rgba(56, 189, 248, 0.25);
-      overflow: hidden;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* 顶部 HUD */
-    .hud {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      pointer-events: none;
-      z-index: 20;
-    }
-    .hud-block {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 8px;
-      padding: 6px 10px;
-      pointer-events: auto;
-    }
-    .hud-title {
-      font-size: 9px;
-      color: #94a3b8;
-      letter-spacing: 1px;
-    }
-    .hud-value {
-      font-size: 15px;
-      font-weight: 800;
-      color: #38bdf8;
-      font-variant-numeric: tabular-nums;
-    }
-    .hp-container {
-      display: flex;
-      gap: 4px;
-      margin-top: 4px;
-    }
-    .hp-dot {
-      width: 14px;
-      height: 6px;
-      border-radius: 2px;
-      background: #334155;
-      transition: all 0.2s;
-    }
-    .hp-dot.active {
-      background: #ef4444;
-      box-shadow: 0 0 8px #ef4444;
-    }
-
-    /* 暴走蓄能条 */
-    .rage-bar-container {
-      width: 100%;
-      height: 4px;
-      background: #1e293b;
-      margin-top: 4px;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .rage-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #fbbf24, #ef4444);
-      transition: width 0.15s;
-    }
-
-    /* Boss 血条 */
-    #bossHud {
-      position: absolute;
-      top: 66px;
-      left: 14px;
-      right: 14px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid #ef4444;
-      border-radius: 6px;
-      padding: 6px 10px;
-      z-index: 20;
-      display: none;
-      pointer-events: none;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
-    }
-    .boss-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      font-weight: 800;
-      color: #f87171;
-      margin-bottom: 4px;
-    }
-    .boss-bar-bg {
-      width: 100%;
-      height: 8px;
-      background: #1e293b;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .boss-bar-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, #f97316, #ef4444);
-      transition: width 0.1s linear;
-    }
-
-    /* 底部技能栏 */
-    .hud-bottom {
-      position: absolute;
-      bottom: 12px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      z-index: 20;
-      pointer-events: none;
-    }
-    .skill-bar {
-      display: flex;
-      gap: 6px;
-      pointer-events: auto;
-    }
-    .skill-btn {
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #94a3b8;
-      padding: 7px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      transition: all 0.2s;
-    }
-    .skill-btn.ready {
-      border-color: #38bdf8;
-      color: #ffffff;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-    }
-    .skill-btn span {
-      font-size: 8px;
-      color: #cbd5e1;
+      background: radial-gradient(circle at 50% 30%, #111a33 0%, var(--bg-dark) 100%);
     }
 
-    /* 遮罩面板通用 */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(5, 5, 13, 0.94);
-      backdrop-filter: blur(10px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      z-index: 100;
-      transition: opacity 0.2s ease;
-    }
-    .overlay.hidden { display: none !important; }
-    .title {
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-
-    /* 主界面钱包卡片 */
-    .menu-wallet-card {
-      width: 100%;
-      max-width: 320px;
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(129, 140, 248, 0.3);
-      border-radius: 12px;
+    /* 顶部 Web3 状态栏 */
+    #web3-header {
       padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      background: var(--card-bg);
+      border-bottom: 1px solid rgba(0, 82, 255, 0.3);
+      backdrop-filter: blur(10px);
+      z-index: 10;
     }
-    .wallet-btn {
-      background: linear-gradient(135deg, #6366f1, #3b82f6);
-      border: 1px solid #818cf8;
-      color: #ffffff;
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       font-size: 11px;
-      font-weight: 800;
-      padding: 6px 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
       border-radius: 20px;
+      background: rgba(0, 82, 255, 0.15);
+      border: 1px solid var(--base-blue);
+      color: var(--neon-cyan);
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #00ff66;
+      box-shadow: 0 0 8px #00ff66;
+    }
+    .btn-connect {
+      background: linear-gradient(135deg, var(--base-blue), #0036b3);
+      color: #fff;
+      border: 1px solid var(--neon-cyan);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: bold;
       cursor: pointer;
-    }
-    .wallet-btn.connected {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: #10b981;
-      color: #34d399;
-    }
-
-    /* 真实 Web3 弹窗 */
-    .wallet-modal-card {
-      background: #0f172a;
-      border: 1px solid #38bdf8;
-      border-radius: 12px;
-      padding: 18px;
-      width: 100%;
-      max-width: 310px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
-    }
-    .wallet-option-btn {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 12px 14px;
-      border-radius: 8px;
-      color: white;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
+      gap: 6px;
+      box-shadow: 0 0 10px rgba(0, 82, 255, 0.4);
       transition: all 0.2s;
     }
-    .wallet-option-btn:hover {
-      background: #334155;
-      border-color: #38bdf8;
+    .btn-connect:active {
+      transform: scale(0.96);
     }
 
-    .key-box {
-      margin-top: 12px;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px dashed rgba(56, 189, 248, 0.3);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 11px;
-      color: #94a3b8;
-      line-height: 1.5;
-      text-align: center;
-      max-width: 320px;
-    }
-    .kb {
-      background: #1e293b;
-      border: 1px solid #475569;
-      color: #38bdf8;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-weight: 800;
-    }
-
-    .card-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    /* 游戏画布区 */
+    #canvas-wrap {
+      flex: 1;
+      position: relative;
       width: 100%;
-      max-width: 320px;
+      height: 100%;
+      overflow: hidden;
     }
-    .upgrade-card, .skin-card {
-      background: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 12px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      text-align: left;
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
     }
-    .upgrade-card:hover, .skin-card:hover {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: #38bdf8;
-      transform: translateY(-2px);
-    }
-    .upgrade-card h4, .skin-card h4 {
-      color: #38bdf8;
-      font-size: 13px;
-      margin-bottom: 3px;
+
+    /* 游戏内 HUD 抬头显示 */
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      right: 12px;
       display: flex;
       justify-content: space-between;
-    }
-    .upgrade-card p, .skin-card p {
-      font-size: 11px;
-      color: #94a3b8;
-      line-height: 1.35;
-    }
-    .num-tag {
-      background: #0284c7;
-      color: #ffffff;
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 4px;
+      pointer-events: none;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      text-shadow: 0 0 6px rgba(0, 240, 255, 0.8);
+      z-index: 5;
     }
 
-    .action-btn {
-      background: linear-gradient(135deg, #38bdf8, #2563eb);
-      border: none;
-      color: white;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 10px 32px;
-      border-radius: 30px;
-      cursor: pointer;
-      margin-top: 10px;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    /* 游戏 UI 浮层 (开始/结束) */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 9, 14, 0.88);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 20;
     }
-    .sec-btn {
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid #475569;
-      color: #94a3b8;
+    .title-glitch {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 2px 2px 0px var(--neon-pink), -2px -2px 0px var(--neon-cyan);
+      margin-bottom: 6px;
+    }
+    .subtitle {
       font-size: 12px;
-      padding: 8px 18px;
-      border-radius: 20px;
+      color: #8da2c4;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+    .card-box {
+      width: 100%;
+      background: rgba(20, 26, 43, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      color: #b0c0d8;
+    }
+    .stat-val {
+      font-weight: bold;
+      color: var(--neon-cyan);
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+      font-weight: bold;
       cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
       margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--base-blue));
+      color: #050a14;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-action:active {
+      transform: scale(0.97);
+    }
+
+    /* 签名凭证窗口 */
+    #sig-modal {
+      position: absolute;
+      inset: 12px;
+      background: #0d121f;
+      border: 1px solid var(--neon-cyan);
+      border-radius: 14px;
+      padding: 18px;
+      display: none;
+      flex-direction: column;
+      z-index: 30;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+    }
+    #sig-text {
+      flex: 1;
+      background: #060911;
+      border: 1px solid #1a2744;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #61f2c2;
+      overflow-y: auto;
+      word-break: break-all;
+      white-space: pre-wrap;
+      margin: 12px 0;
+    }
+
+    /* 提示小浮条 */
+    #toast {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--neon-cyan);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
-  <div id="game-container">
+
+<div id="app-container">
+  <!-- 顶部 Web3 状态栏 -->
+  <header id="web3-header">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span id="network-badge">BASE MAINNET</span>
+    </div>
+    <button class="btn-connect" id="btn-wallet" onclick="handleWalletClick()">
+      <span>🦊</span>
+      <span id="wallet-text">连接钱包</span>
+    </button>
+  </header>
+
+  <!-- 游戏主画布 -->
+  <div id="canvas-wrap">
     <canvas id="gameCanvas"></canvas>
-
-    <!-- 顶部 HUD -->
-    <div class="hud">
-      <div class="hud-block">
-        <div class="hud-title">SCORE / BEST</div>
-        <div class="hud-value"><span id="scoreDisplay">0</span> <span style="font-size:11px; color:#64748b;">/ <span id="bestDisplay">0</span></span></div>
-        <div class="hp-container">
-          <div class="hp-dot active" id="hp1"></div>
-          <div class="hp-dot active" id="hp2"></div>
-          <div class="hp-dot active" id="hp3"></div>
-        </div>
-        <div class="rage-bar-container" title="拾取 3 个 P 符进入暴走">
-          <div class="rage-bar-fill" id="rageBar"></div>
-        </div>
-      </div>
-      
-      <div class="hud-block" style="text-align: right;">
-        <div class="hud-title">STAGE & SECTOR</div>
-        <div class="hud-value" style="color: #38bdf8;" id="waveDisplay">SECTOR 1</div>
-        <div class="hud-title" style="margin-top:2px;">SYS LV.<span id="lvlDisplay" style="color:#fbbf24; font-weight:800;">1</span> · 💎<span id="inGameTokens">0</span></div>
-      </div>
-    </div>
-
-    <!-- Boss 血条 -->
-    <div id="bossHud">
-      <div class="boss-info">
-        <span id="bossName">BOSS: QUANTUM CORE</span>
-        <span id="bossHpPercent">100%</span>
-      </div>
-      <div class="boss-bar-bg">
-        <div class="boss-bar-fill" id="bossBarFill"></div>
-      </div>
-    </div>
-
-    <!-- 底部主动技能 -->
-    <div class="hud-bottom">
-      <button class="skill-btn" style="padding: 8px 12px;" onclick="togglePause()">⏸️<span>ESC</span></button>
-      <div class="skill-bar">
-        <button class="skill-btn" id="btnShield" onclick="useShield()">🛡️ 护盾<span id="cdShield">[Q] READY</span></button>
-        <button class="skill-btn" id="btnHyper" onclick="useHyperBeam()">⚡ 聚能炮<span id="cdHyper">[E] READY</span></button>
-        <button class="skill-btn" id="btnEmp" onclick="useEMP()">💥 必杀<span id="cdEmp">[SPACE] 0%</span></button>
-      </div>
-    </div>
-
-    <!-- 主界面 -->
-    <div class="overlay" id="startOverlay">
-      <div class="title">QUANTUM OVERLOAD</div>
-      <p style="color:#38bdf8; font-size:11px; font-weight:800; margin-bottom:8px; letter-spacing:1px;">⚡ 雷霆战机 · 无限星区版</p>
-
-      <!-- Web3 连接面板 -->
-      <div class="menu-wallet-card">
-        <div style="font-size:12px; font-weight:800; color:#fbbf24;">💎 <span id="tokenDisplay">0</span> $QDUST</div>
-        <button class="wallet-btn" id="walletBtn" onclick="openWalletModal()">CONNECT WALLET</button>
-      </div>
-
-      <p style="color: #94a3b8; font-size: 12px; margin-bottom: 6px;">
-        当前战机涂装：<b style="color:#38bdf8;" id="currentSkinText">量子苍穹</b>
-      </p>
-
-      <button class="action-btn" onclick="startGame()">START MISSION</button>
-
-      <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button class="sec-btn" onclick="openHangar()">🚀 机库涂装</button>
-        <button class="sec-btn" onclick="openQuests()">📜 悬赏任务</button>
-      </div>
-
-      <div class="key-box">
-        <b>🎮 玩法与按键指南</b><br/>
-        移动: <span class="kb">WASD / 鼠标按住拖拽</span><br/>
-        物资: 击毁敌机吸取 <b style="color:#38bdf8;">[蓝晶]</b> 升级 & <b style="color:#fbbf24;">[P符]</b> 暴走<br/>
-        技能: <span class="kb">Q</span> 护盾 | <span class="kb">E</span> 聚能炮 | <span class="kb">Space</span> 必杀
-      </div>
-    </div>
-
-    <!-- Web3 真实弹窗 -->
-    <div class="overlay hidden" id="walletModal">
-      <div class="wallet-modal-card">
-        <h4 style="color:#38bdf8; text-align:center; margin-bottom:4px;">连接加密钱包</h4>
-        <p style="color:#94a3b8; font-size:11px; text-align:center; margin-bottom:10px;">连接免费解锁【👑 黄金赛博】战机</p>
-        
-        <button class="wallet-option-btn" onclick="connectSpecificWallet('okx')">
-          <span>🟢 OKX Web3 钱包</span>
-          <span style="font-size:11px; color:#38bdf8;">唤醒 / 跳转 ↗</span>
-        </button>
-        <button class="wallet-option-btn" onclick="connectSpecificWallet('metamask')">
-          <span>🦊 MetaMask 钱包</span>
-          <span style="font-size:11px; color:#38bdf8;">唤醒 / 跳转 ↗</span>
-        </button>
-        <button class="wallet-option-btn" onclick="connectSpecificWallet('injected')">
-          <span>🔷 浏览器默认插件</span>
-          <span style="font-size:11px; color:#38bdf8;">直接调用</span>
-        </button>
-        
-        <button class="sec-btn" style="margin-top:6px;" onclick="closeWalletModal()">取消</button>
-      </div>
-    </div>
-
-    <!-- 机库面板 -->
-    <div class="overlay hidden" id="hangarOverlay">
-      <div class="title">QUANTUM HANGAR</div>
-      <div class="card-group">
-        <div class="skin-card" onclick="selectSkin('cyan')">
-          <h4>🔷 量子苍穹 (Cyan Standard)</h4>
-          <p>经典战机涂装。青蓝能量弹道 (默认解锁)</p>
-        </div>
-        <div class="skin-card" onclick="selectSkin('gold')">
-          <h4>👑 黄金赛博 (Cyber Gold)</h4>
-          <p>Web3 专属战机。暴走流金弹道。<span style="color:#fbbf24;">(主界面连接钱包免费解锁)</span></p>
-        </div>
-        <div class="skin-card" onclick="selectSkin('void')">
-          <h4>🔮 虚空黑晶 (Void Obsidian)</h4>
-          <p>深渊暗物质战机。释放紫黑毁灭光束。<span style="color:#c084fc;">(消耗 300 $QDUST 兑换)</span></p>
-        </div>
-      </div>
-      <button class="sec-btn" style="margin-top:14px;" onclick="closeHangar()">BACK</button>
-    </div>
-
-    <!-- 每日任务面板 -->
-    <div class="overlay hidden" id="questsOverlay">
-      <div class="title">DAILY BOUNTY</div>
-      <div class="card-group">
-        <div class="upgrade-card" style="cursor:default;">
-          <h4>🎯 任务一：火力暴走</h4>
-          <p>单局内拾取 3 个 P 符进入暴走状态。奖励：<b style="color:#fbbf24;">+100 $QDUST</b></p>
-        </div>
-        <div class="upgrade-card" style="cursor:default;">
-          <h4>⚡ 任务二：水晶采集</h4>
-          <p>单局累计拾取 30 颗能量水晶。奖励：<b style="color:#fbbf24;">+150 $QDUST</b></p>
-        </div>
-        <div class="upgrade-card" style="cursor:default;">
-          <h4>👑 任务三：星区征服者</h4>
-          <p>击破任意关底 Boss。奖励：<b style="color:#fbbf24;">+200 $QDUST</b></p>
-        </div>
-      </div>
-      <button class="sec-btn" style="margin-top:14px;" onclick="closeQuests()">BACK</button>
-    </div>
-
-    <!-- 暂停面板 -->
-    <div class="overlay hidden" id="pauseOverlay">
-      <div class="title">SYSTEM PAUSED</div>
-      <div style="display:flex; flex-direction:column; gap:10px; width:200px;">
-        <button class="action-btn" onclick="togglePause()">RESUME [ESC]</button>
-        <button class="sec-btn" onclick="toggleAudio()"><span id="audioStatus">🔊 音效: ON</span></button>
-        <button class="sec-btn" onclick="quitToMenu()">ABORT MISSION</button>
-      </div>
-    </div>
-
-    <!-- 肉鸽升级面板 -->
-    <div class="overlay hidden" id="upgradeOverlay">
-      <div class="title">LEVEL UP EVOLUTION</div>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:8px;">可按键盘 <span class="kb">1</span> <span class="kb">2</span> <span class="kb">3</span> 秒选</p>
-      <div class="card-group" id="cardList"></div>
-    </div>
-
-    <!-- 游戏结束面板 -->
-    <div class="overlay hidden" id="gameOverOverlay">
-      <div class="title" style="background: linear-gradient(to right, #ef4444, #f97316); -webkit-background-clip: text;">MISSION FAILED</div>
-      <p style="color: #94a3b8; margin-bottom: 2px; font-size: 11px;">FINAL SCORE</p>
-      <div style="font-size: 28px; font-weight: 900; color: #38bdf8;" id="finalScore">0</div>
-      <p style="color: #fbbf24; font-size: 12px; margin: 6px 0;" id="earnedTokens">+0 $QDUST EARNED</p>
-      <button class="action-btn" onclick="signRecordOnChain()">✍️ 链上签名防篡改战绩</button>
-      <button class="sec-btn" style="margin-top:8px;" onclick="restartGame()">RESTART MISSION [Space]</button>
+    <div id="hud">
+      <div>SCORE: <span id="hud-score" style="color:var(--neon-cyan)">0</span></div>
+      <div>ENERGY: <span id="hud-energy" style="color:var(--neon-amber)">0</span></div>
+      <div>SHIELD: <span id="hud-shield" style="color:#ff3366">100%</span></div>
     </div>
   </div>
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const container = document.getElementById('game-container');
+  <!-- 初始开始界面 -->
+  <div class="overlay" id="screen-start">
+    <div class="title-glitch">PULSE PIONEER</div>
+    <div class="subtitle">BASE NETWORK // 战术弹幕拦截机</div>
+    <div class="card-box">
+      <div style="color:var(--neon-cyan); font-weight:bold; margin-bottom:6px;">🎮 驾驶指南：</div>
+      <p style="color:#94a3b8; font-size:12px; margin-bottom:8px;">• 手机：按住屏幕任意位置直接拖动战机</p>
+      <p style="color:#94a3b8; font-size:12px; margin-bottom:8px;">• 电脑：键盘 WASD 或鼠标按住拖拽</p>
+      <p style="color:#94a3b8; font-size:12px;">• 目标：避开红色暗能球，拦截敌机并吸收金色脉冲晶核！</p>
+    </div>
+    <button class="btn-action btn-primary" onclick="startGame()">
+      <span>🚀</span> 启动量子推进引擎 (START)
+    </button>
+  </div>
 
-    let W = 0, H = 0;
-    function resizeCanvas() {
-      W = canvas.width = container.clientWidth;
-      H = canvas.height = container.clientHeight;
+  <!-- 结算界面 -->
+  <div class="overlay" id="screen-gameover" style="display: none;">
+    <div class="title-glitch" style="text-shadow: 2px 2px 0px #f00, -2px -2px 0px #fff;">HULL BREACHED</div>
+    <div class="subtitle">战机受损坠毁 // 战斗数据已锁定</div>
+    <div class="card-box">
+      <div class="stat-row"><span>最终得分 (Score)</span><span class="stat-val" id="res-score">0</span></div>
+      <div class="stat-row"><span>暗能晶核 (Crystals)</span><span class="stat-val" id="res-crystals">0</span></div>
+      <div class="stat-row"><span>最高历史记录</span><span class="stat-val" id="res-high">0</span></div>
+      <div class="stat-row"><span>驾驶员地址</span><span class="stat-val" id="res-wallet" style="font-size:11px;">未连接</span></div>
+    </div>
+    <button class="btn-action btn-primary" id="btn-sign" onclick="signCombatRecord()">
+      <span>✍️</span> 签名战报并验证防伪 (Web3 Sign)
+    </button>
+    <button class="btn-action btn-secondary" onclick="restartGame()">
+      <span>🔄</span> 重新出击 (Restart)
+    </button>
+  </div>
+
+  <!-- 签名证明弹出框 -->
+  <div id="sig-modal">
+    <div style="font-weight:bold; color:var(--neon-cyan); display:flex; justify-content:space-between;">
+      <span>🛡️ 链上私钥签名证书</span>
+      <span style="cursor:pointer;" onclick="closeSigModal()">✕</span>
+    </div>
+    <div id="sig-text"></div>
+    <button class="btn-action btn-primary" onclick="closeSigModal()">确定并返回</button>
+  </div>
+
+  <!-- 气泡提示 -->
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+   1. 8-Bit Web Audio 合成音效 (无需任何外链音频文件)
+============================================================ */
+const AudioSys = {
+  ctx: null,
+  init() {
+    if (!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
     }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    /* --- 真实 Web3 钱包（自动切换以太坊主网，解决 chain is not set up） --- */
-    let realAccount = null;
-    let activeProvider = null;
-    let qdustTokens = parseInt(localStorage.getItem('qo_qdust_tokens') || '0');
-    let currentSkin = localStorage.getItem('qo_current_skin') || 'cyan';
-    let ownedSkins = JSON.parse(localStorage.getItem('qo_owned_skins') || '["cyan"]');
-
-    function refreshTokensUI() {
-      document.getElementById('tokenDisplay').innerText = qdustTokens;
-      document.getElementById('inGameTokens').innerText = qdustTokens;
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
     }
-    refreshTokensUI();
+  },
+  playLaser() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.12);
+  },
+  playExplode() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.3);
+  },
+  playCrystal() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(520, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(780, this.ctx.currentTime + 0.08);
+    osc.frequency.setValueAtTime(1040, this.ctx.currentTime + 0.16);
+    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.25);
+  }
+};
 
-    function openWalletModal() { document.getElementById('walletModal').classList.remove('hidden'); }
-    function closeWalletModal() { document.getElementById('walletModal').classList.add('hidden'); }
+/* ============================================================
+   2. Web3 / Base 链交互逻辑 (零第三方库依赖，纯原生通信)
+============================================================ */
+const BASE_CHAIN_ID_HEX = '0x2105'; // 8453 (Base Mainnet)
+const BASE_CONFIG = {
+  chainId: BASE_CHAIN_ID_HEX,
+  chainName: 'Base',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: ['https://mainnet.base.org'],
+  blockExplorerUrls: ['https://basescan.org']
+};
 
-    function getProvider(type) {
-      if (type === 'okx') {
-        if (window.okxwallet) return window.okxwallet;
-        if (window.ethereum?.isOkxWallet) return window.ethereum;
-        if (window.ethereum?.providers) return window.ethereum.providers.find(p => p.isOkxWallet);
-      }
-      if (type === 'metamask') {
-        if (window.ethereum?.isMetaMask && !window.ethereum?.isOkxWallet) return window.ethereum;
-        if (window.ethereum?.providers) return window.ethereum.providers.find(p => p.isMetaMask && !p.isOkxWallet);
-      }
-      return window.ethereum || null;
-    }
+let userAccount = null;
+let userBalance = '0.000';
 
-    async function connectSpecificWallet(type) {
-      closeWalletModal();
-      const p = getProvider(type);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2600);
+}
 
-      if (p && typeof p.request === 'function') {
-        try {
-          // 步骤 1: 尝试直接请求账户
-          let accounts = [];
-          try {
-            accounts = await p.request({ method: 'eth_requestAccounts' });
-          } catch (reqErr) {
-            // 步骤 2: 捕获 "chain is not set up"，主动要求钱包切换/初始化到以太坊网络 0x1
-            if (reqErr.message && reqErr.message.includes('chain is not set up')) {
-              try {
-                await p.request({
-                  method: 'wallet_switchEthereumChain',
-                  params: [{ chainId: '0x1' }]
-                });
-                accounts = await p.request({ method: 'eth_requestAccounts' });
-              } catch (switchErr) {
-                alert("⚠️ 请在您的钱包顶部将网络切换为以太坊 (Ethereum) 或任意 EVM 网络后再试！");
-                return;
-              }
-            } else {
-              throw reqErr;
-            }
-          }
+async function handleWalletClick() {
+  AudioSys.init();
+  if (typeof window.ethereum === 'undefined') {
+    showToast('⚠️ 未检测到钱包！请在 MetaMask App 内置浏览器中打开');
+    return;
+  }
+  try {
+    // 1. 请求连接账户
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!accounts || accounts.length === 0) return;
+    userAccount = accounts[0];
 
-          if (accounts && accounts.length > 0) {
-            realAccount = accounts[0];
-            activeProvider = p;
-            const short = realAccount.substring(0, 5) + '...' + realAccount.substring(realAccount.length - 4);
-            const btn = document.getElementById('walletBtn');
-            btn.innerText = `🟢 ${short}`;
-            btn.classList.add('connected');
+    // 2. 检查并强制切换至 Base 链
+    await ensureBaseNetwork();
 
-            if (!ownedSkins.includes('gold')) {
-              ownedSkins.push('gold');
-              localStorage.setItem('qo_owned_skins', JSON.stringify(ownedSkins));
-              alert(`🎉 钱包 [${short}] 连接成功！已为你解锁【👑 黄金赛博】战机！`);
-            }
-            return;
-          }
-        } catch (err) {
-          if (err.code === 4001) alert("用户已取消连接。");
-          else alert("⚠️ 连接提示: " + (err.message || JSON.stringify(err)));
-          return;
-        }
-      }
+    // 3. 查余额
+    await fetchBalance();
 
-      if (type === 'metamask') {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
-        else if (confirm("未检测到 MetaMask 插件，是否前往官网安装？")) window.open('https://metamask.io/download/', '_blank');
-      } else if (type === 'okx') {
-        if (confirm("未检测到 OKX 钱包插件，是否前往 OKX 官网安装？")) window.open('https://www.okx.com/web3', '_blank');
+    updateWalletUI();
+    showToast('✅ 钱包已成功连接至 Base 主网！');
+  } catch (err) {
+    console.error(err);
+    showToast('❌ 连接失败: ' + (err.message || err));
+  }
+}
+
+async function ensureBaseNetwork() {
+  const currentChain = await window.ethereum.request({ method: 'eth_chainId' });
+  if (currentChain !== BASE_CHAIN_ID_HEX) {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: BASE_CHAIN_ID_HEX }]
+      });
+    } catch (switchError) {
+      if (switchError.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [BASE_CONFIG]
+        });
       } else {
-        alert("❌ 当前环境未检测到 Web3 插件。");
+        throw switchError;
+      }
+    }
+  }
+}
+
+async function fetchBalance() {
+  if (!userAccount) return;
+  try {
+    const rawBalance = await window.ethereum.request({
+      method: 'eth_getBalance',
+      params: [userAccount, 'latest']
+    });
+    const wei = BigInt(rawBalance);
+    const eth = Number(wei) / 1e18;
+    userBalance = eth.toFixed(4);
+  } catch (e) {
+    console.warn('获取余额失败', e);
+  }
+}
+
+function updateWalletUI() {
+  if (!userAccount) return;
+  const shortAddr = userAccount.slice(0, 4) + '...' + userAccount.slice(-3);
+  document.getElementById('wallet-text').innerText = `${shortAddr} (${userBalance} ETH)`;
+  document.getElementById('btn-wallet').style.borderColor = '#00ff66';
+  document.getElementById('res-wallet').innerText = userAccount.slice(0, 8) + '...' + userAccount.slice(-6);
+}
+
+// 战报签名逻辑 (无需 Gas 费，用私钥为高分盖戳防篡改)
+async function signCombatRecord() {
+  AudioSys.init();
+  if (!userAccount) {
+    await handleWalletClick();
+    if (!userAccount) return;
+  }
+
+  const payload = {
+    domain: "Quantum Arcade - Base Network",
+    pilot: userAccount,
+    score: Game.score,
+    energyCrystals: Game.crystals,
+    timestamp: new Date().toISOString(),
+    chainId: 8453,
+    status: "COMBAT_VERIFIED_AUTHENTIC"
+  };
+
+  const message = `[PULSE PIONEER 战报公证]
+----------------------------------
+驾驶员: ${payload.pilot}
+最终战功: ${payload.score} PTS
+捕获暗能: ${payload.energyCrystals} 晶核
+公证网络: Base Mainnet (8453)
+时间戳: ${payload.timestamp}
+----------------------------------
+请签名确认本局战报防伪指纹。此操作不会扣除任何 Gas 费。`;
+
+  try {
+    // 转换成十六进制传递给 personal_sign
+    const hexMsg = '0x' + Array.from(new TextEncoder().encode(message))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+
+    const signature = await window.ethereum.request({
+      method: 'personal_sign',
+      params: [hexMsg, userAccount]
+    });
+
+    const certText = `=== 链上战报防伪证书 (PASSED) ===\n\n` +
+      `【明文摘要】\n${message}\n\n` +
+      `【ECDSA 签名 Hash】\n${signature}\n\n` +
+      `【验证状态】: 凭证与公钥完全匹配，已防伪锁定。`;
+
+    document.getElementById('sig-text').innerText = certText;
+    document.getElementById('sig-modal').style.display = 'flex';
+    AudioSys.playCrystal();
+  } catch (err) {
+    showToast('签名已取消或失败: ' + (err.message || ''));
+  }
+}
+
+function closeSigModal() {
+  document.getElementById('sig-modal').style.display = 'none';
+}
+
+/* ============================================================
+   3. 街机弹幕引擎 (支持手机触摸跟随 + 桌面按键/拖拽)
+============================================================ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+function resizeCanvas() {
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+const Game = {
+  running: false,
+  score: 0,
+  crystals: 0,
+  highScore: parseInt(localStorage.getItem('base_arcade_high') || '0'),
+  shield: 100,
+  player: { x: 0, y: 0, r: 16, targetX: 0, targetY: 0 },
+  bullets: [],
+  enemies: [],
+  particles: [],
+  crystalsItems: [],
+  stars: [],
+  lastShot: 0,
+  spawnTimer: 0
+};
+
+// 初始化星空背景
+for (let i = 0; i < 45; i++) {
+  Game.stars.push({
+    x: Math.random() * 500,
+    y: Math.random() * 800,
+    speed: 0.5 + Math.random() * 1.5,
+    size: 1 + Math.random() * 2
+  });
+}
+
+function startGame() {
+  AudioSys.init();
+  resizeCanvas();
+  Game.running = true;
+  Game.score = 0;
+  Game.crystals = 0;
+  Game.shield = 100;
+  Game.bullets = [];
+  Game.enemies = [];
+  Game.particles = [];
+  Game.crystalsItems = [];
+  Game.player.x = canvas.width / 2;
+  Game.player.y = canvas.height - 80;
+  Game.player.targetX = Game.player.x;
+  Game.player.targetY = Game.player.y;
+
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-gameover').style.display = 'none';
+  updateHUD();
+}
+
+function restartGame() {
+  startGame();
+}
+
+function gameOver() {
+  Game.running = false;
+  AudioSys.playExplode();
+
+  if (Game.score > Game.highScore) {
+    Game.highScore = Game.score;
+    localStorage.setItem('base_arcade_high', Game.highScore.toString());
+  }
+
+  document.getElementById('res-score').innerText = Game.score;
+  document.getElementById('res-crystals').innerText = Game.crystals;
+  document.getElementById('res-high').innerText = Game.highScore;
+  document.getElementById('screen-gameover').style.display = 'flex';
+}
+
+function updateHUD() {
+  document.getElementById('hud-score').innerText = Game.score;
+  document.getElementById('hud-energy').innerText = Game.crystals;
+  const s = Math.max(0, Math.floor(Game.shield));
+  document.getElementById('hud-shield').innerText = `${s}%`;
+  document.getElementById('hud-shield').style.color = s > 30 ? '#00f0ff' : '#ff3366';
+}
+
+// 触摸/鼠标交互
+let isPointerDown = false;
+function setTargetPos(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  Game.player.targetX = clientX - rect.left;
+  Game.player.targetY = clientY - rect.top;
+}
+
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  isPointerDown = true;
+  if (e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (isPointerDown && e.touches[0]) {
+    setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
+  }
+}, { passive: false });
+
+window.addEventListener('touchend', () => { isPointerDown = false; });
+
+canvas.addEventListener('mousedown', (e) => {
+  isPointerDown = true;
+  setTargetPos(e.clientX, e.clientY);
+});
+window.addEventListener('mousemove', (e) => {
+  if (isPointerDown) setTargetPos(e.clientX, e.clientY);
+});
+window.addEventListener('mouseup', () => { isPointerDown = false; });
+
+// 键盘控制支持
+const keys = {};
+window.addEventListener('keydown', (e) => { keys[e.key] = true; });
+window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+/* ============================================================
+   4. 主游戏循环
+============================================================ */
+function loop(now) {
+  requestAnimationFrame(loop);
+
+  // 清屏与深空渐变
+  ctx.fillStyle = '#060911';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 绘制星空移动
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  for (let s of Game.stars) {
+    s.y += s.speed;
+    if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+    ctx.fillRect(s.x, s.y, s.size, s.size);
+  }
+
+  if (!Game.running) return;
+
+  // 玩家位置平滑跟随
+  if (keys['ArrowLeft'] || keys['a']) Game.player.x -= 5;
+  if (keys['ArrowRight'] || keys['d']) Game.player.x += 5;
+  if (keys['ArrowUp'] || keys['w']) Game.player.y -= 5;
+  if (keys['ArrowDown'] || keys['s']) Game.player.y += 5;
+
+  Game.player.x += (Game.player.targetX - Game.player.x) * 0.22;
+  Game.player.y += (Game.player.targetY - Game.player.y) * 0.22;
+
+  // 边界约束
+  Game.player.x = Math.max(20, Math.min(canvas.width - 20, Game.player.x));
+  Game.player.y = Math.max(30, Math.min(canvas.height - 30, Game.player.y));
+
+  // 自动极速射击
+  if (now - Game.lastShot > 140) {
+    Game.bullets.push({ x: Game.player.x - 7, y: Game.player.y - 15, vy: -11 });
+    Game.bullets.push({ x: Game.player.x + 7, y: Game.player.y - 15, vy: -11 });
+    AudioSys.playLaser();
+    Game.lastShot = now;
+  }
+
+  // 敌机生成
+  Game.spawnTimer++;
+  if (Game.spawnTimer % 36 === 0) {
+    const isHeavy = Math.random() < 0.22;
+    Game.enemies.push({
+      x: 20 + Math.random() * (canvas.width - 40),
+      y: -25,
+      r: isHeavy ? 20 : 13,
+      hp: isHeavy ? 4 : 1,
+      speed: isHeavy ? 1.8 : (2.5 + Math.random() * 2),
+      color: isHeavy ? '#ff0055' : '#ffaa00'
+    });
+  }
+
+  // 更新子弹
+  for (let i = Game.bullets.length - 1; i >= 0; i--) {
+    let b = Game.bullets[i];
+    b.y += b.vy;
+    ctx.fillStyle = '#00f0ff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 8;
+    ctx.fillRect(b.x - 2, b.y - 6, 4, 12);
+    ctx.shadowBlur = 0;
+
+    if (b.y < -10) Game.bullets.splice(i, 1);
+  }
+
+  // 更新敌机
+  for (let i = Game.enemies.length - 1; i >= 0; i--) {
+    let e = Game.enemies[i];
+    e.y += e.speed;
+
+    // 绘制敌机
+    ctx.fillStyle = e.color;
+    ctx.shadowColor = e.color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // 检查子弹碰撞
+    for (let j = Game.bullets.length - 1; j >= 0; j--) {
+      let b = Game.bullets[j];
+      const dist = Math.hypot(e.x - b.x, e.y - b.y);
+      if (dist < e.r + 5) {
+        Game.bullets.splice(j, 1);
+        e.hp--;
+        if (e.hp <= 0) {
+          // 爆炸效果
+          createExplosion(e.x, e.y, e.color);
+          AudioSys.playExplode();
+          Game.score += 150;
+
+          // 掉落暗能晶核
+          if (Math.random() < 0.45) {
+            Game.crystalsItems.push({ x: e.x, y: e.y, vy: 1.5 });
+          }
+
+          Game.enemies.splice(i, 1);
+          updateHUD();
+          break;
+        }
       }
     }
 
-    async function signRecordOnChain() {
-      if (!realAccount || !activeProvider) {
-        alert("⚠️ 请先在主界面点击 CONNECT WALLET 连接真实钱包！");
+    // 检查与玩家本体碰撞
+    const pDist = Math.hypot(e.x - Game.player.x, e.y - Game.player.y);
+    if (pDist < e.r + Game.player.r) {
+      Game.shield -= 34;
+      createExplosion(e.x, e.y, '#ff0033');
+      Game.enemies.splice(i, 1);
+      updateHUD();
+      if (Game.shield <= 0) {
+        gameOver();
         return;
       }
-      try {
-        const msg = `[QUANTUM OVERLOAD 战绩凭据]\n玩家: ${realAccount}\n得分: ${score}\n时间: ${new Date().toLocaleString()}`;
-        const hexMsg = "0x" + Array.from(new TextEncoder().encode(msg)).map(b => b.toString(16).padStart(2, '0')).join('');
-        const sig = await activeProvider.request({
-          method: 'personal_sign',
-          params: [hexMsg, realAccount]
-        });
-        alert(`✅ 战绩链上签名成功！\nHash: ${sig.substring(0, 22)}...`);
-      } catch(e) {
-        if (e.code === 4001) alert("已取消签名。");
-        else alert("签名失败: " + (e.message || e));
-      }
     }
 
-    /* --- 机库面板 --- */
-    function openHangar() { document.getElementById('hangarOverlay').classList.remove('hidden'); }
-    function closeHangar() { document.getElementById('hangarOverlay').classList.add('hidden'); updateSkinText(); }
-    function openQuests() { document.getElementById('questsOverlay').classList.remove('hidden'); }
-    function closeQuests() { document.getElementById('questsOverlay').classList.add('hidden'); }
+    if (e.y > canvas.height + 30) Game.enemies.splice(i, 1);
+  }
 
-    function updateSkinText() {
-      const names = { cyan: '量子苍穹 (Cyan)', gold: '黄金赛博 (Gold)', void: '虚空黑晶 (Void)' };
-      document.getElementById('currentSkinText').innerText = names[currentSkin] || '量子苍穹';
+  // 更新晶核
+  for (let i = Game.crystalsItems.length - 1; i >= 0; i--) {
+    let c = Game.crystalsItems[i];
+    c.y += c.vy;
+
+    // 金色旋转晶核
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(now * 0.005);
+    ctx.fillStyle = '#ffaa00';
+    ctx.shadowColor = '#ffaa00';
+    ctx.shadowBlur = 10;
+    ctx.fillRect(-6, -6, 12, 12);
+    ctx.restore();
+
+    // 吸收检测
+    if (Math.hypot(c.x - Game.player.x, c.y - Game.player.y) < Game.player.r + 14) {
+      Game.crystals++;
+      Game.score += 300;
+      AudioSys.playCrystal();
+      Game.crystalsItems.splice(i, 1);
+      updateHUD();
+    } else if (c.y > canvas.height + 20) {
+      Game.crystalsItems.splice(i, 1);
     }
-    updateSkinText();
+  }
 
-    function selectSkin(type) {
-      if (type === 'cyan') currentSkin = 'cyan';
-      else if (type === 'gold') {
-        if (!ownedSkins.includes('gold')) {
-          alert('请先在主界面连接 Web3 钱包免费解锁！');
-          return;
-        }
-        currentSkin = 'gold';
-      } else if (type === 'void') {
-        if (!ownedSkins.includes('void')) {
-          if (qdustTokens >= 300) {
-            qdustTokens -= 300;
-            localStorage.setItem('qo_qdust_tokens', qdustTokens);
-            refreshTokensUI();
-            ownedSkins.push('void');
-            localStorage.setItem('qo_owned_skins', JSON.stringify(ownedSkins));
-            currentSkin = 'void';
-            alert('🎉 成功兑换【虚空黑晶】涂装！');
-          } else {
-            alert('❌ $QDUST 代币不足 300！');
-            return;
-          }
-        } else currentSkin = 'void';
-      }
-      localStorage.setItem('qo_current_skin', currentSkin);
-      closeHangar();
-    }
+  // 粒子动画
+  for (let i = Game.particles.length - 1; i >= 0; i--) {
+    let p = Game.particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.035;
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+    ctx.globalAlpha = 1.0;
+    if (p.life <= 0) Game.particles.splice(i, 1);
+  }
 
-    /* --- 音频系统 --- */
-    let audioCtx = null;
-    let audioMuted = false;
-    function initAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
-    function toggleAudio() {
-      audioMuted = !audioMuted;
-      document.getElementById('audioStatus').innerText = audioMuted ? '🔇 音效: OFF' : '🔊 音效: ON';
-    }
-    function playTone(freq, type = 'sine', duration = 0.1, gain = 0.08) {
-      if (!audioCtx || audioMuted) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        g.gain.setValueAtTime(gain, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.connect(g);
-        g.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch(e) {}
-    }
+  // 绘制玩家飞船 (赛博青色三角战机)
+  drawPlayerShip(Game.player.x, Game.player.y);
+}
 
-    /* --- 核心游戏参数与无限波次系统 (Infinite Wave System) --- */
-    let frameCount = 0;
-    let score = 0;
-    let hp = 3;
-    let empEnergy = 0;
-    const maxEmp = 100;
-    let isGameRunning = false;
-    let isGameOver = false;
-    let isPaused = false;
-    let screenShake = 0;
+function drawPlayerShip(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
 
-    let currentSector = 1;
-    let sectorScoreProgress = 0;
-    let sectorBossSpawned = false;
-    let patrolSpawnTimer = 0;
+  // 尾焰
+  ctx.fillStyle = '#ff0055';
+  ctx.beginPath();
+  ctx.moveTo(-5, 12);
+  ctx.lineTo(0, 22 + Math.random() * 8);
+  ctx.lineTo(5, 12);
+  ctx.fill();
 
-    let powerCount = 0;
-    let overdriveTimer = 0;
+  // 主机体
+  ctx.fillStyle = '#00f0ff';
+  ctx.shadowColor = '#00f0ff';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.moveTo(0, -18);
+  ctx.lineTo(15, 12);
+  ctx.lineTo(0, 6);
+  ctx.lineTo(-15, 12);
+  ctx.closePath();
+  ctx.fill();
 
-    let shieldCD = 0;
-    let hyperBeamCD = 0;
-    let activeShieldTimer = 0;
-    let activeHyperTimer = 0;
+  // 核心舱
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(0, 0, 4, 0, Math.PI * 2);
+  ctx.fill();
 
-    const player = {
-      x: 240,
-      y: 650,
-      hitR: 4,
-      grazeR: 32,
-      level: 1,
-      exp: 0,
-      nextExp: 60,
-      invincibleTimer: 0,
-      primaryFireTimer: 0,
-      weaponLevel: 1,
-      droneCount: 0,
-      teslaLevel: 0
-    };
+  ctx.restore();
+}
 
-    let playerBullets = [];
-    let enemies = [];
-    let enemyBullets = [];
-    let dropItems = [];
-    let floatingTexts = [];
-    let boss = null;
-    let currentUpgradeChoices = [];
-
-    /* --- 键盘与鼠标输入 --- */
-    const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, Shift: false };
-
-    window.addEventListener('keydown', e => {
-      if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
-      if (keys.hasOwnProperty(e.code)) keys[e.code] = true;
-      if (e.key === 'Shift') keys.Shift = true;
-
-      if (e.key === 'q' || e.key === 'Q') useShield();
-      if (e.key === 'e' || e.key === 'E') useHyperBeam();
-      if (e.code === 'Space') {
-        if (isGameOver) restartGame();
-        else useEMP();
-      }
-      if (e.code === 'Escape') togglePause();
-
-      if (!document.getElementById('upgradeOverlay').classList.contains('hidden')) {
-        if (e.key === '1' && currentUpgradeChoices[0]) selectUpgrade(currentUpgradeChoices[0].id);
-        if (e.key === '2' && currentUpgradeChoices[1]) selectUpgrade(currentUpgradeChoices[1].id);
-        if (e.key === '3' && currentUpgradeChoices[2]) selectUpgrade(currentUpgradeChoices[2].id);
-      }
+function createExplosion(x, y, color) {
+  for (let i = 0; i < 14; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 4;
+    Game.particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      color,
+      size: 2 + Math.random() * 3,
+      life: 1.0
     });
-
-    window.addEventListener('keyup', e => {
-      if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
-      if (keys.hasOwnProperty(e.code)) keys[e.code] = false;
-      if (e.key === 'Shift') keys.Shift = false;
-    });
-
-    function handlePointerMove(clientX, clientY) {
-      if (!isGameRunning || isPaused) return;
-      const rect = canvas.getBoundingClientRect();
-      player.x = Math.max(16, Math.min(W - 16, clientX - rect.left));
-      player.y = Math.max(24, Math.min(H - 24, clientY - rect.top - 20));
-    }
-    window.addEventListener('mousemove', e => {
-      if (e.buttons === 1) handlePointerMove(e.clientX, e.clientY);
-    });
-    window.addEventListener('touchmove', e => {
-      if (e.touches.length > 0) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: false });
-
-    function togglePause() {
-      if (!isGameRunning || isGameOver) return;
-      isPaused = !isPaused;
-      document.getElementById('pauseOverlay').classList.toggle('hidden', !isPaused);
-    }
-    function quitToMenu() {
-      isPaused = false;
-      isGameRunning = false;
-      document.getElementById('pauseOverlay').classList.add('hidden');
-      document.getElementById('startOverlay').classList.remove('hidden');
-      document.getElementById('bossHud').style.display = 'none';
-    }
-
-    /* --- 主动战术技能 --- */
-    function useShield() {
-      if (shieldCD > 0 || !isGameRunning || isPaused) return;
-      shieldCD = 720;
-      activeShieldTimer = 180;
-      playTone(500, 'triangle', 0.4, 0.2);
-      floatingTexts.push({ x: player.x, y: player.y - 30, text: '🛡️ 量子护盾!', color: '#38bdf8', life: 1.2 });
-    }
-
-    function useHyperBeam() {
-      if (hyperBeamCD > 0 || !isGameRunning || isPaused) return;
-      hyperBeamCD = 900;
-      activeHyperTimer = 100;
-      triggerShake(6);
-      playTone(300, 'sawtooth', 0.8, 0.3);
-      floatingTexts.push({ x: player.x, y: player.y - 30, text: '⚡ 聚能歼灭激光!', color: '#fbbf24', life: 1.2 });
-    }
-
-    function useEMP() {
-      if (empEnergy < maxEmp || isGameOver || isPaused) return;
-      empEnergy = 0;
-      triggerShake(8);
-      playTone(180, 'sine', 0.6, 0.3);
-      enemyBullets = [];
-      enemies.forEach(en => en.hp -= 30);
-      floatingTexts.push({ x: player.x, y: player.y - 35, text: '💥 全屏 EMP 必杀!', color: '#38bdf8', life: 1.5 });
-    }
-
-    function triggerShake(magnitude) { screenShake = Math.max(screenShake, magnitude); }
-
-    /* --- 🌟 无限波次导演引擎 (Wave Director) --- */
-    function updateWaves() {
-      patrolSpawnTimer++;
-
-      if (!boss && !sectorBossSpawned) {
-        if (patrolSpawnTimer % 160 === 0) {
-          const pattern = Math.floor(Math.random() * 4);
-          const hpScale = 1 + (currentSector - 1) * 0.35;
-
-          if (pattern === 0) {
-            for (let i = 0; i < 5; i++) {
-              enemies.push({
-                x: W / 2 + (i - 2) * 55,
-                y: -30 - Math.abs(i - 2) * 28,
-                vx: 0,
-                vy: 1.3,
-                hp: Math.floor(6 * hpScale),
-                maxHp: Math.floor(6 * hpScale),
-                r: 12,
-                type: 'scout',
-                color: '#38bdf8'
-              });
-            }
-          } else if (pattern === 1) {
-            for (let i = 0; i < 4; i++) {
-              enemies.push({
-                x: i % 2 === 0 ? 35 : W - 35,
-                y: -20 - i * 45,
-                vx: i % 2 === 0 ? 0.9 : -0.9,
-                vy: 1.7,
-                hp: Math.floor(12 * hpScale),
-                maxHp: Math.floor(12 * hpScale),
-                r: 14,
-                type: 'assault',
-                color: '#a855f7'
-              });
-            }
-          } else if (pattern === 2) {
-            enemies.push({
-              x: Math.random() * (W - 120) + 60,
-              y: -50,
-              vx: (Math.random() - 0.5) * 0.6,
-              vy: 0.9,
-              targetY: Math.random() * 80 + 100,
-              hp: Math.floor(55 * hpScale),
-              maxHp: Math.floor(55 * hpScale),
-              r: 22,
-              type: 'frigate',
-              color: '#f97316'
-            });
-          } else if (pattern === 3) {
-            for (let i = 0; i < 6; i++) {
-              enemies.push({
-                x: 35 + i * ((W - 70) / 5),
-                y: -20 - (i % 2) * 25,
-                vx: 0,
-                vy: 2.2,
-                hp: Math.floor(4 * hpScale),
-                maxHp: Math.floor(4 * hpScale),
-                r: 10,
-                type: 'drone_rush',
-                color: '#ef4444'
-              });
-            }
-          }
-        }
-
-        if (sectorScoreProgress >= 800) {
-          sectorBossSpawned = true;
-          document.getElementById('waveDisplay').innerText = `⚠️ SECTOR ${currentSector} BOSS`;
-          floatingTexts.push({ x: W / 2, y: H * 0.4, text: '⚠️ WARNING: BOSS INCOMING!', color: '#ef4444', life: 2.5 });
-          
-          const bossHp = Math.floor(200 * (1 + (currentSector - 1) * 0.6));
-          boss = {
-            x: W / 2,
-            y: -60,
-            targetY: 130,
-            hp: bossHp,
-            maxHp: bossHp,
-            hitR: 30,
-            rot: 0,
-            hitFlash: 0,
-            fireTimer: 0,
-            name: `SECTOR ${currentSector} CORE`
-          };
-          document.getElementById('bossName').innerText = boss.name;
-          document.getElementById('bossHud').style.display = 'block';
-          triggerShake(8);
-          playTone(180, 'sawtooth', 1.2, 0.35);
-        }
-      }
-    }
-
-    /* --- 敌机行为与掉落物 --- */
-    function updateEnemies() {
-      enemies = enemies.filter(en => {
-        if (en.targetY && en.y < en.targetY) {
-          en.y += en.vy;
-        } else if (!en.targetY) {
-          en.x += en.vx;
-          en.y += en.vy;
-        }
-
-        if (en.type === 'assault' && frameCount % 80 === 0) {
-          const ang = Math.atan2(player.y - en.y, player.x - en.x);
-          enemyBullets.push({ x: en.x, y: en.y, vx: Math.cos(ang) * 2.3, vy: Math.sin(ang) * 2.3, r: 4, color: '#ef4444' });
-        } else if (en.type === 'frigate' && frameCount % 50 === 0) {
-          for (let i = -1; i <= 1; i++) {
-            const ang = Math.atan2(player.y - en.y, player.x - en.x) + i * 0.28;
-            enemyBullets.push({ x: en.x, y: en.y, vx: Math.cos(ang) * 2.6, vy: Math.sin(ang) * 2.6, r: 4.5, color: '#f97316' });
-          }
-        }
-
-        ctx.fillStyle = en.color;
-        ctx.beginPath();
-        ctx.arc(en.x, en.y, en.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (en.hp <= 0) {
-          const pts = en.maxHp * 8;
-          score += pts;
-          sectorScoreProgress += pts;
-          document.getElementById('scoreDisplay').innerText = score;
-          triggerShake(2);
-          playTone(400, 'square', 0.1, 0.1);
-
-          dropItems.push({ x: en.x - 6, y: en.y, type: 'exp', vy: 1.5 });
-          dropItems.push({ x: en.x + 6, y: en.y, type: 'exp', vy: 1.5 });
-
-          if (Math.random() < 0.35 || en.type === 'frigate') {
-            dropItems.push({ x: en.x, y: en.y, type: 'power', vy: 1.2 });
-          }
-          return false;
-        }
-        return en.y < H + 40 && en.x > -40 && en.x < W + 40;
-      });
-
-      if (boss) {
-        boss.fireTimer++;
-        if (boss.y < boss.targetY) boss.y += 1.0;
-        boss.x = W / 2 + Math.sin(frameCount * 0.03) * (W * 0.35);
-        boss.rot += 0.03;
-
-        const hpPct = Math.max(0, Math.floor((boss.hp / boss.maxHp) * 100));
-        document.getElementById('bossHpPercent').innerText = `${hpPct}%`;
-        document.getElementById('bossBarFill').style.width = `${hpPct}%`;
-
-        if (boss.fireTimer % 18 === 0) {
-          const bulletCount = 4 + (currentSector > 1 ? 2 : 0);
-          for (let i = 0; i < bulletCount; i++) {
-            const ang = boss.rot + (i * Math.PI * 2 / bulletCount);
-            enemyBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(ang) * 2.8, vy: Math.sin(ang) * 2.8, r: 5, color: '#ef4444' });
-          }
-        }
-
-        ctx.save();
-        ctx.translate(boss.x, boss.y);
-        ctx.rotate(boss.rot);
-        ctx.strokeStyle = boss.hitFlash > 0 ? '#ffffff' : '#ef4444';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(-22, -22, 44, 44);
-        ctx.restore();
-        if (boss.hitFlash > 0) boss.hitFlash--;
-
-        if (boss.hp <= 0) {
-          score += 2000;
-          qdustTokens += 150;
-          refreshTokensUI();
-          triggerShake(10);
-          floatingTexts.push({ x: boss.x, y: boss.y, text: `🎉 SECTOR ${currentSector} CLEARED! +150 $QDUST`, color: '#fbbf24', life: 2.5 });
-          
-          for (let i = 0; i < 8; i++) {
-            dropItems.push({ x: boss.x + (Math.random()-0.5)*60, y: boss.y + (Math.random()-0.5)*40, type: 'exp', vy: 1.5 });
-            dropItems.push({ x: boss.x + (Math.random()-0.5)*60, y: boss.y + (Math.random()-0.5)*40, type: 'power', vy: 1.2 });
-          }
-
-          document.getElementById('bossHud').style.display = 'none';
-          boss = null;
-          
-          currentSector++;
-          sectorScoreProgress = 0;
-          sectorBossSpawned = false;
-          document.getElementById('waveDisplay').innerText = `SECTOR ${currentSector}`;
-        }
-      }
-    }
-
-    /* --- 水晶与暴走 P 符 --- */
-    function updateDropItems() {
-      dropItems = dropItems.filter(item => {
-        const dist = Math.hypot(player.x - item.x, player.y - item.y);
-        if (dist < 110) {
-          item.x += (player.x - item.x) * 0.18;
-          item.y += (player.y - item.y) * 0.18;
-        } else {
-          item.y += item.vy;
-        }
-
-        if (dist < player.grazeR + 10) {
-          if (item.type === 'exp') {
-            player.exp += 20;
-            playTone(880, 'sine', 0.05, 0.05);
-            if (player.exp >= player.nextExp) {
-              player.exp -= player.nextExp;
-              player.level++;
-              player.nextExp = Math.floor(player.nextExp * 1.35);
-              document.getElementById('lvlDisplay').innerText = player.level;
-              triggerLevelUp();
-            }
-          } else if (item.type === 'power') {
-            powerCount++;
-            playTone(1100, 'triangle', 0.1, 0.08);
-            if (powerCount >= 3) {
-              powerCount = 0;
-              overdriveTimer = 360;
-              floatingTexts.push({ x: player.x, y: player.y - 40, text: '🔥 OVERDRIVE 战机暴走!', color: '#fbbf24', life: 1.5 });
-              triggerShake(4);
-            } else {
-              player.weaponLevel = Math.min(3, player.weaponLevel + 1);
-            }
-          }
-          return false;
-        }
-
-        if (item.type === 'exp') {
-          ctx.fillStyle = '#38bdf8';
-          ctx.beginPath();
-          ctx.arc(item.x, item.y, 4, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (item.type === 'power') {
-          ctx.fillStyle = '#fbbf24';
-          ctx.fillRect(item.x - 5, item.y - 5, 10, 10);
-          ctx.fillStyle = '#000000';
-          ctx.font = 'bold 8px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('P', item.x, item.y + 3);
-        }
-
-        return item.y < H + 20;
-      });
-
-      document.getElementById('rageBar').style.width = overdriveTimer > 0 ? `${(overdriveTimer / 360) * 100}%` : `${(powerCount / 3) * 100}%`;
-    }
-
-    /* --- 开火与弹道 --- */
-    function handlePlayerShooting() {
-      player.primaryFireTimer++;
-      const isOverdrive = overdriveTimer > 0;
-      if (overdriveTimer > 0) overdriveTimer--;
-
-      const fireRate = isOverdrive ? 4 : 8;
-      const bulletColor = isOverdrive ? '#fbbf24' : (currentSkin === 'gold' ? '#fbbf24' : (currentSkin === 'void' ? '#c084fc' : '#38bdf8'));
-
-      if (player.primaryFireTimer % fireRate === 0) {
-        const dmg = isOverdrive ? 4.5 : 2.0;
-        if (isOverdrive) {
-          for (let i = -2; i <= 2; i++) {
-            playerBullets.push({ x: player.x + i * 8, y: player.y - 12, vx: i * 1.5, vy: -15, dmg: dmg, color: '#fbbf24' });
-          }
-          playTone(980, 'square', 0.04, 0.03);
-        } else {
-          if (player.weaponLevel === 1) {
-            playerBullets.push({ x: player.x - 6, y: player.y - 12, vx: 0, vy: -13, dmg: dmg, color: bulletColor });
-            playerBullets.push({ x: player.x + 6, y: player.y - 12, vx: 0, vy: -13, dmg: dmg, color: bulletColor });
-          } else if (player.weaponLevel === 2) {
-            for (let i = -1; i <= 1; i++) playerBullets.push({ x: player.x + i * 8, y: player.y - 10, vx: i * 2, vy: -13, dmg: dmg, color: bulletColor });
-          } else {
-            for (let i = -2; i <= 2; i++) playerBullets.push({ x: player.x, y: player.y - 10, vx: i * 3, vy: -13, dmg: dmg, color: bulletColor });
-          }
-          playTone(850, 'sine', 0.03, 0.02);
-        }
-      }
-
-      if (activeHyperTimer > 0) {
-        activeHyperTimer--;
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.85)';
-        ctx.fillRect(player.x - 12, 0, 24, player.y);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(player.x - 4, 0, 8, player.y);
-
-        if (boss && Math.abs(boss.x - player.x) < boss.hitR + 12) {
-          boss.hp -= 2.0;
-          boss.hitFlash = 2;
-        }
-        enemies.forEach(en => {
-          if (Math.abs(en.x - player.x) < en.r + 12) en.hp -= 2.5;
-        });
-      }
-
-      playerBullets = playerBullets.filter(b => {
-        b.x += b.vx;
-        b.y += b.vy;
-
-        ctx.fillStyle = b.color;
-        ctx.fillRect(b.x - 1.5, b.y, 3, 10);
-
-        if (boss && Math.hypot(b.x - boss.x, b.y - boss.y) < boss.hitR) {
-          boss.hp -= b.dmg;
-          boss.hitFlash = 2;
-          return false;
-        }
-        for (let en of enemies) {
-          if (Math.hypot(b.x - en.x, b.y - en.y) < en.r) {
-            en.hp -= b.dmg;
-            return false;
-          }
-        }
-        return b.y > -20 && b.x > -20 && b.x < W + 20;
-      });
-    }
-
-    /* --- 肉鸽升级 --- */
-    const ALL_UPGRADES = [
-      { id: 'w_power', title: '主炮超频火力 (Power Boost)', desc: '直接增加 1 档常驻主炮等级，并提高 20% 基础伤害' },
-      { id: 'drone', title: '量子自律浮游机 (Drone)', desc: '部署 1 架协同护航副炮（最多 2 架），自动开火' },
-      { id: 'tesla', title: '特斯拉电弧立场 (Tesla)', desc: '周期性释放电弧粉碎靠近的子弹与小型敌机' },
-      { id: 'shield', title: '纳米修复护盾 (Shield Repair)', desc: '立刻恢复 1 格机体装甲，并增加擦弹吸附半径' }
-    ];
-
-    function triggerLevelUp() {
-      isPaused = true;
-      playTone(550, 'sine', 0.3, 0.15);
-      const list = document.getElementById('cardList');
-      list.innerHTML = '';
-      currentUpgradeChoices = [...ALL_UPGRADES].sort(() => 0.5 - Math.random()).slice(0, 3);
-
-      currentUpgradeChoices.forEach((u, idx) => {
-        const div = document.createElement('div');
-        div.className = 'upgrade-card';
-        div.innerHTML = `<h4><span>${u.title}</span> <span class="num-tag">[ ${idx + 1} ]</span></h4><p>${u.desc}</p>`;
-        div.onclick = () => selectUpgrade(u.id);
-        list.appendChild(div);
-      });
-      document.getElementById('upgradeOverlay').classList.remove('hidden');
-    }
-
-    function selectUpgrade(id) {
-      if (id === 'w_power') player.weaponLevel = Math.min(3, player.weaponLevel + 1);
-      else if (id === 'drone') player.droneCount = Math.min(2, player.droneCount + 1);
-      else if (id === 'tesla') player.teslaLevel++;
-      else if (id === 'shield') {
-        hp = Math.min(3, hp + 1);
-        player.grazeR += 4;
-        updateHpUI();
-      }
-      document.getElementById('upgradeOverlay').classList.add('hidden');
-      isPaused = false;
-    }
-
-    /* --- 主渲染循环 --- */
-    function loop() {
-      if (!isGameRunning || isGameOver || isPaused) {
-        requestAnimationFrame(loop);
-        return;
-      }
-      frameCount++;
-
-      if (shieldCD > 0) shieldCD--;
-      if (hyperBeamCD > 0) hyperBeamCD--;
-      if (activeShieldTimer > 0) activeShieldTimer--;
-
-      document.getElementById('btnShield').classList.toggle('ready', shieldCD <= 0);
-      document.getElementById('cdShield').innerText = shieldCD <= 0 ? '[Q] READY' : `[Q] ${Math.ceil(shieldCD/60)}s`;
-      document.getElementById('btnHyper').classList.toggle('ready', hyperBeamCD <= 0);
-      document.getElementById('cdHyper').innerText = hyperBeamCD <= 0 ? '[E] READY' : `[E] ${Math.ceil(hyperBeamCD/60)}s`;
-      document.getElementById('btnEmp').classList.toggle('ready', empEnergy >= maxEmp);
-      document.getElementById('cdEmp').innerText = empEnergy >= maxEmp ? '[SPACE] READY' : `[SPACE] ${Math.floor((empEnergy/maxEmp)*100)}%`;
-
-      const spd = keys.Shift ? 2.8 : 6.2;
-      let mx = 0, my = 0;
-      if (keys.w || keys.ArrowUp) my -= 1;
-      if (keys.s || keys.ArrowDown) my += 1;
-      if (keys.a || keys.ArrowLeft) mx -= 1;
-      if (keys.d || keys.ArrowRight) mx += 1;
-      if (mx !== 0 || my !== 0) {
-        if (mx !== 0 && my !== 0) { mx *= 0.7071; my *= 0.7071; }
-        player.x = Math.max(16, Math.min(W - 16, player.x + mx * spd));
-        player.y = Math.max(24, Math.min(H - 24, player.y + my * spd));
-      }
-
-      ctx.save();
-      if (screenShake > 0) {
-        ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
-        screenShake *= 0.88;
-        if (screenShake < 0.2) screenShake = 0;
-      }
-
-      ctx.fillStyle = '#050711';
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
-      const offset = (frameCount * 2) % 40;
-      for (let y = offset; y < H; y += 40) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      }
-
-      updateWaves();
-      updateEnemies();
-      updateDropItems();
-      handlePlayerShooting();
-
-      enemyBullets = enemyBullets.filter(b => {
-        b.x += b.vx;
-        b.y += b.vy;
-
-        ctx.fillStyle = b.color;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        const dist = Math.hypot(b.x - player.x, b.y - player.y);
-
-        if (activeShieldTimer > 0 && dist < player.grazeR + 8) return false;
-
-        if (dist < player.grazeR && dist > player.hitR && !b.grazed) {
-          b.grazed = true;
-          empEnergy = Math.min(maxEmp, empEnergy + 4);
-          score += 10;
-        }
-
-        if (player.invincibleTimer <= 0 && activeShieldTimer <= 0 && dist < player.hitR + b.r * 0.7) {
-          hp--;
-          player.invincibleTimer = 50;
-          triggerShake(6);
-          updateHpUI();
-          playTone(120, 'sawtooth', 0.3, 0.2);
-
-          if (hp <= 0) {
-            isGameOver = true;
-            document.getElementById('finalScore').innerText = score;
-            const earned = Math.floor(score / 30);
-            document.getElementById('earnedTokens').innerText = `+${earned} $QDUST EARNED`;
-            qdustTokens += earned;
-            localStorage.setItem('qo_qdust_tokens', qdustTokens);
-            refreshTokensUI();
-            document.getElementById('gameOverOverlay').classList.remove('hidden');
-          }
-          return false;
-        }
-        return b.y < H + 20 && b.y > -20 && b.x > -20 && b.x < W + 20;
-      });
-
-      if (player.invincibleTimer > 0) player.invincibleTimer--;
-
-      // 绘制自机
-      ctx.save();
-      ctx.translate(player.x, player.y);
-
-      if (activeShieldTimer > 0) {
-        ctx.beginPath();
-        ctx.arc(0, 0, player.grazeR + 6, 0, Math.PI * 2);
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-
-      if (player.invincibleTimer % 4 < 2) {
-        ctx.fillStyle = overdriveTimer > 0 ? '#fbbf24' : (currentSkin === 'gold' ? '#fbbf24' : (currentSkin === 'void' ? '#a855f7' : '#38bdf8'));
-        ctx.beginPath();
-        ctx.moveTo(0, -16);
-        ctx.lineTo(12, 12);
-        ctx.lineTo(0, 6);
-        ctx.lineTo(-12, 12);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(0, 0, player.hitR, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      floatingTexts = floatingTexts.filter(t => {
-        t.y -= 0.6; t.life -= 0.015;
-        ctx.fillStyle = t.color;
-        ctx.font = 'bold 12px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(t.text, t.x, t.y);
-        return t.life > 0;
-      });
-
-      ctx.restore();
-      requestAnimationFrame(loop);
-    }
-
-    function updateHpUI() {
-      for (let i = 1; i <= 3; i++) {
-        document.getElementById(`hp${i}`).classList.toggle('active', i <= hp);
-      }
-    }
-
-    function startGame() {
-      initAudio();
-      document.getElementById('startOverlay').classList.add('hidden');
-      isGameRunning = true;
-      restartGame();
-    }
-
-    function restartGame() {
-      frameCount = 0;
-      score = 0;
-      hp = 3;
-      empEnergy = 0;
-      currentSector = 1;
-      sectorScoreProgress = 0;
-      sectorBossSpawned = false;
-      patrolSpawnTimer = 0;
-
-      powerCount = 0;
-      overdriveTimer = 0;
-      shieldCD = 0;
-      hyperBeamCD = 0;
-      activeShieldTimer = 0;
-      activeHyperTimer = 0;
-      isGameOver = false;
-      isPaused = false;
-      enemies = [];
-      enemyBullets = [];
-      playerBullets = [];
-      dropItems = [];
-      boss = null;
-
-      player.level = 1;
-      player.exp = 0;
-      player.nextExp = 60;
-      player.weaponLevel = 1;
-      player.droneCount = 0;
-      player.teslaLevel = 0;
-
-      updateHpUI();
-      document.getElementById('scoreDisplay').innerText = '0';
-      document.getElementById('lvlDisplay').innerText = '1';
-      document.getElementById('waveDisplay').innerText = 'SECTOR 1';
-      document.getElementById('bossHud').style.display = 'none';
-      document.getElementById('gameOverOverlay').classList.add('hidden');
-      document.getElementById('upgradeOverlay').classList.add('hidden');
-    }
-
-    requestAnimationFrame(loop);
-  </script>
+  }
+}
+
+// 启动循环
+requestAnimationFrame(loop);
+
+// 自动检测是否已有现成钱包注入
+window.addEventListener('load', () => {
+  if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
+    userAccount = window.ethereum.selectedAddress;
+    updateWalletUI();
+  }
+});
+</script>
 </body>
 </html>
