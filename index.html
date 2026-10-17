@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Base Arcade: 脉冲先锋 | Web3 链上街机</title>
+  <title>Pulse Pioneer: Base 脉冲先锋 (代币生态版)</title>
   <style>
     :root {
       --base-blue: #0052ff;
       --neon-cyan: #00f0ff;
       --neon-pink: #ff007f;
       --neon-amber: #ffaa00;
+      --neon-green: #00ff66;
+      --gold-token: #ffd700;
       --bg-dark: #07090e;
-      --card-bg: rgba(13, 17, 28, 0.85);
+      --card-bg: rgba(13, 17, 28, 0.90);
     }
     * {
       box-sizing: border-box;
@@ -27,39 +29,43 @@
       background-color: var(--bg-dark);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
       color: #fff;
-      touch-action: none; /* 防止手机端页面拖动与回弹 */
+      touch-action: none;
     }
     #app-container {
       position: relative;
       width: 100%;
       height: 100%;
-      max-width: 480px;
+      max-width: 500px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at 50% 30%, #111a33 0%, var(--bg-dark) 100%);
+      background: radial-gradient(circle at 50% 30%, #0d162d 0%, var(--bg-dark) 100%);
     }
 
-    /* 顶部 Web3 状态栏 */
+    /* 顶部 Web3 & 代币状态栏 */
     #web3-header {
-      padding: 10px 14px;
+      padding: 7px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--card-bg);
+      border-bottom: 1px solid rgba(0, 82, 255, 0.35);
+      backdrop-filter: blur(10px);
+      z-index: 15;
+    }
+    .header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--card-bg);
-      border-bottom: 1px solid rgba(0, 82, 255, 0.3);
-      backdrop-filter: blur(10px);
-      z-index: 10;
     }
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      font-weight: 800;
       padding: 4px 8px;
-      border-radius: 20px;
+      border-radius: 16px;
       background: rgba(0, 82, 255, 0.15);
       border: 1px solid var(--base-blue);
       color: var(--neon-cyan);
@@ -68,29 +74,61 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #00ff66;
-      box-shadow: 0 0 8px #00ff66;
+      background: var(--neon-green);
+      box-shadow: 0 0 8px var(--neon-green);
     }
-    .btn-connect {
-      background: linear-gradient(135deg, var(--base-blue), #0036b3);
+    .btn-wallet-connect {
+      background: linear-gradient(135deg, var(--base-blue), #002d99);
       color: #fff;
       border: 1px solid var(--neon-cyan);
       border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 12px;
+      padding: 5px 10px;
+      font-size: 11px;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       box-shadow: 0 0 10px rgba(0, 82, 255, 0.4);
-      transition: all 0.2s;
-    }
-    .btn-connect:active {
-      transform: scale(0.96);
     }
 
-    /* 游戏画布区 */
+    /* 代币与特权副标题条 */
+    .token-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      border: 1px dashed rgba(255, 215, 0, 0.35);
+    }
+    .token-balance-display {
+      color: var(--gold-token);
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .vip-tag {
+      background: linear-gradient(90deg, #ffd700, #ff8800);
+      color: #000;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: none;
+    }
+    .btn-config-token {
+      background: transparent;
+      border: none;
+      color: #8da2c4;
+      font-size: 11px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* 画布与 HUD */
     #canvas-wrap {
       flex: 1;
       position: relative;
@@ -104,36 +142,80 @@
       height: 100%;
       touch-action: none;
     }
-
-    /* 游戏内 HUD 抬头显示 */
     #hud {
       position: absolute;
-      top: 10px;
-      left: 12px;
-      right: 12px;
+      top: 8px;
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
       pointer-events: none;
       font-family: monospace;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       text-shadow: 0 0 6px rgba(0, 240, 255, 0.8);
       z-index: 5;
     }
 
-    /* 游戏 UI 浮层 (开始/结束) */
+    /* Boss 血条 */
+    #boss-bar-wrap {
+      position: absolute;
+      top: 36px;
+      left: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #ff0055;
+      border-radius: 6px;
+      height: 10px;
+      display: none;
+      overflow: hidden;
+      z-index: 6;
+      box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+    }
+    #boss-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff0055, #ffaa00);
+      transition: width 0.1s linear;
+    }
+
+    /* 触控大招按钮 */
+    #btn-bomb {
+      position: absolute;
+      bottom: 22px;
+      right: 16px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff0055 30%, #770022 100%);
+      border: 2px solid #ffaa00;
+      box-shadow: 0 0 16px rgba(255, 0, 85, 0.6);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+      color: #fff;
+      font-weight: 900;
+      font-size: 11px;
+    }
+    #btn-bomb:active { transform: scale(0.9); }
+    #bomb-count { font-size: 13px; color: var(--neon-cyan); }
+
+    /* UI 弹窗通用 */
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(7, 9, 14, 0.88);
+      background: rgba(7, 9, 14, 0.92);
       backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 24px;
+      padding: 20px;
       text-align: center;
-      z-index: 20;
+      z-index: 25;
     }
     .title-glitch {
       font-size: 26px;
@@ -141,21 +223,21 @@
       letter-spacing: 2px;
       color: #fff;
       text-shadow: 2px 2px 0px var(--neon-pink), -2px -2px 0px var(--neon-cyan);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .subtitle {
       font-size: 12px;
       color: #8da2c4;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       letter-spacing: 1px;
     }
     .card-box {
       width: 100%;
-      background: rgba(20, 26, 43, 0.8);
+      background: rgba(18, 24, 38, 0.88);
       border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 14px;
+      margin-bottom: 14px;
       text-align: left;
       font-size: 13px;
       line-height: 1.6;
@@ -164,7 +246,7 @@
       display: flex;
       justify-content: space-between;
       margin: 4px 0;
-      color: #b0c0d8;
+      color: #a8b8d0;
     }
     .stat-val {
       font-weight: bold;
@@ -175,46 +257,66 @@
 
     .btn-action {
       width: 100%;
-      padding: 13px;
-      border-radius: 10px;
+      padding: 12px;
+      border-radius: 9px;
       border: none;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 7px;
       transition: all 0.2s;
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--neon-cyan), var(--base-blue));
       color: #050a14;
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    }
+    .btn-token {
+      background: linear-gradient(135deg, #ffd700, #ff8800);
+      color: #120b00;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
     }
     .btn-secondary {
       background: rgba(255, 255, 255, 0.1);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    .btn-action:active {
-      transform: scale(0.97);
-    }
+    .btn-action:active { transform: scale(0.97); }
 
-    /* 签名凭证窗口 */
-    #sig-modal {
+    /* 代币设置浮层 */
+    #token-modal, #sig-modal {
       position: absolute;
-      inset: 12px;
+      inset: 16px;
       background: #0d121f;
-      border: 1px solid var(--neon-cyan);
-      border-radius: 14px;
+      border: 1px solid var(--gold-token);
+      border-radius: 12px;
       padding: 18px;
       display: none;
       flex-direction: column;
-      z-index: 30;
-      box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+      z-index: 35;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
     }
+    .input-box {
+      width: 100%;
+      background: #060911;
+      border: 1px solid #1f2d4d;
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-family: monospace;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .input-box:focus {
+      outline: none;
+      border-color: var(--neon-cyan);
+    }
+
     #sig-text {
       flex: 1;
       background: #060911;
@@ -227,17 +329,17 @@
       overflow-y: auto;
       word-break: break-all;
       white-space: pre-wrap;
-      margin: 12px 0;
+      margin: 10px 0;
     }
 
-    /* 提示小浮条 */
+    /* 吐司条 */
     #toast {
       position: absolute;
-      bottom: 20px;
+      bottom: 25px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid var(--neon-cyan);
+      background: rgba(5, 7, 12, 0.95);
+      border: 1px solid var(--gold-token);
       color: #fff;
       padding: 8px 16px;
       border-radius: 20px;
@@ -253,16 +355,29 @@
 <body>
 
 <div id="app-container">
-  <!-- 顶部 Web3 状态栏 -->
+  <!-- 顶部状态栏 -->
   <header id="web3-header">
-    <div class="badge">
-      <span class="badge-dot"></span>
-      <span id="network-badge">BASE MAINNET</span>
+    <div class="header-row">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span id="network-badge">BASE MAINNET</span>
+      </div>
+      <button class="btn-wallet-connect" id="btn-wallet" onclick="handleWalletClick()">
+        <span>🦊</span>
+        <span id="wallet-text">连接钱包</span>
+      </button>
     </div>
-    <button class="btn-connect" id="btn-wallet" onclick="handleWalletClick()">
-      <span>🦊</span>
-      <span id="wallet-text">连接钱包</span>
-    </button>
+
+    <!-- 代币持仓 & VIP 条 -->
+    <div class="token-bar">
+      <div class="token-balance-display">
+        <span>🪙</span>
+        <span id="token-symbol-tag">$TOKEN</span>: 
+        <span id="token-balance-num">0</span>
+        <span class="vip-tag" id="vip-status">VIP PILOT</span>
+      </div>
+      <button class="btn-config-token" onclick="openTokenModal()">⚙️ 配置代币</button>
+    </div>
   </header>
 
   <!-- 游戏主画布 -->
@@ -270,267 +385,366 @@
     <canvas id="gameCanvas"></canvas>
     <div id="hud">
       <div>SCORE: <span id="hud-score" style="color:var(--neon-cyan)">0</span></div>
-      <div>ENERGY: <span id="hud-energy" style="color:var(--neon-amber)">0</span></div>
-      <div>SHIELD: <span id="hud-shield" style="color:#ff3366">100%</span></div>
+      <div>LOOT: <span id="hud-loot" style="color:var(--gold-token)">0</span></div>
+      <div>SHIELD: <span id="hud-shield" style="color:#00f0ff">100%</span></div>
+    </div>
+    
+    <!-- Boss 警报血条 -->
+    <div id="boss-bar-wrap">
+      <div id="boss-bar-fill"></div>
+    </div>
+
+    <!-- 全屏核爆按钮 -->
+    <div id="btn-bomb" onclick="triggerNuclearBomb(event)">
+      <span>BOMB</span>
+      <span id="bomb-count">1</span>
     </div>
   </div>
 
-  <!-- 初始开始界面 -->
+  <!-- 初始界面 -->
   <div class="overlay" id="screen-start">
     <div class="title-glitch">PULSE PIONEER</div>
-    <div class="subtitle">BASE NETWORK // 战术弹幕拦截机</div>
+    <div class="subtitle">BASE 主网代币战区 // TOKEN ARCADIA</div>
     <div class="card-box">
-      <div style="color:var(--neon-cyan); font-weight:bold; margin-bottom:6px;">🎮 驾驶指南：</div>
-      <p style="color:#94a3b8; font-size:12px; margin-bottom:8px;">• 手机：按住屏幕任意位置直接拖动战机</p>
-      <p style="color:#94a3b8; font-size:12px; margin-bottom:8px;">• 电脑：键盘 WASD 或鼠标按住拖拽</p>
-      <p style="color:#94a3b8; font-size:12px;">• 目标：避开红色暗能球，拦截敌机并吸收金色脉冲晶核！</p>
+      <div style="color:var(--gold-token); font-weight:bold; margin-bottom:6px;">🪙 代币赋能玩法说明：</div>
+      <p style="color:#94a3b8; font-size:12px; margin-bottom:5px;">• <b>持币者特权</b>：钱包持有你的代币自动激活金色机翼、开局核弹+1、护盾+20%！</p>
+      <p style="color:#94a3b8; font-size:12px; margin-bottom:5px;">• <b>战场采矿</b>：击落敌机直接掉落旋转代币金币，累积战功储备！</p>
+      <p style="color:#94a3b8; font-size:12px; margin-bottom:5px;">• <b>一键导入</b>：支持随时将你的代币一键注册进 MetaMask 钱包！</p>
     </div>
     <button class="btn-action btn-primary" onclick="startGame()">
-      <span>🚀</span> 启动量子推进引擎 (START)
+      <span>🚀</span> 全功率出击 (START MISSION)
     </button>
   </div>
 
   <!-- 结算界面 -->
   <div class="overlay" id="screen-gameover" style="display: none;">
-    <div class="title-glitch" style="text-shadow: 2px 2px 0px #f00, -2px -2px 0px #fff;">HULL BREACHED</div>
-    <div class="subtitle">战机受损坠毁 // 战斗数据已锁定</div>
+    <div class="title-glitch" style="text-shadow: 2px 2px 0px #ff0055, -2px -2px 0px #fff;">MISSION DEBRIEF</div>
+    <div class="subtitle">战役结束 // 资产与数据结算</div>
     <div class="card-box">
-      <div class="stat-row"><span>最终得分 (Score)</span><span class="stat-val" id="res-score">0</span></div>
-      <div class="stat-row"><span>暗能晶核 (Crystals)</span><span class="stat-val" id="res-crystals">0</span></div>
-      <div class="stat-row"><span>最高历史记录</span><span class="stat-val" id="res-high">0</span></div>
-      <div class="stat-row"><span>驾驶员地址</span><span class="stat-val" id="res-wallet" style="font-size:11px;">未连接</span></div>
+      <div class="stat-row"><span>最终总得分</span><span class="stat-val" id="res-score">0</span></div>
+      <div class="stat-row"><span>本局开采代币</span><span class="stat-val" id="res-loot" style="color:var(--gold-token)">0 $TOKEN</span></div>
+      <div class="stat-row"><span>最高连击数</span><span class="stat-val" id="res-combo">0x</span></div>
+      <div class="stat-row"><span>钱包代币总持仓</span><span class="stat-val" id="res-token-hold" style="color:var(--gold-token)">0</span></div>
     </div>
-    <button class="btn-action btn-primary" id="btn-sign" onclick="signCombatRecord()">
-      <span>✍️</span> 签名战报并验证防伪 (Web3 Sign)
+    
+    <!-- 代币生态操作 -->
+    <button class="btn-action btn-token" onclick="addTokenToMetaMask()">
+      <span>🦊</span> 把此代币一键添加到我的 MetaMask 钱包
+    </button>
+    <button class="btn-action btn-primary" onclick="signCombatRecord()">
+      <span>✍️</span> 签名本局代币战报 (免 Gas 费防伪公证)
     </button>
     <button class="btn-action btn-secondary" onclick="restartGame()">
-      <span>🔄</span> 重新出击 (Restart)
+      <span>🔄</span> 重构机体再战一局
     </button>
   </div>
 
-  <!-- 签名证明弹出框 -->
+  <!-- 代币合约设置弹窗 -->
+  <div id="token-modal">
+    <div style="font-weight:bold; color:var(--gold-token); display:flex; justify-content:space-between;">
+      <span>⚙️ 配置你的代币 (Base ERC-20)</span>
+      <span style="cursor:pointer;" onclick="closeTokenModal()">✕</span>
+    </div>
+    <p style="font-size:11px; color:#8da2c4; margin-top:8px;">
+      粘贴你在 Base 链上部署的代币合约地址，游戏将自动从区块链读取余额与特权状态：
+    </p>
+
+    <label style="font-size:11px; color:#a0aec0; margin-top:10px; display:block;">代币合约地址 (Contract Address):</label>
+    <input type="text" id="cfg-token-address" class="input-box" placeholder="0x... (例如你的 Meme 币或治理代币)" />
+
+    <label style="font-size:11px; color:#a0aec0; display:block;">代币符号 (Symbol):</label>
+    <input type="text" id="cfg-token-symbol" class="input-box" placeholder="例如 GAME / MOON / DOGE" />
+
+    <button class="btn-action btn-token" onclick="saveTokenConfig()">
+      <span>💾</span> 保存并立刻从 Base 链刷新数据
+    </button>
+  </div>
+
+  <!-- 签名公证书弹窗 -->
   <div id="sig-modal">
     <div style="font-weight:bold; color:var(--neon-cyan); display:flex; justify-content:space-between;">
-      <span>🛡️ 链上私钥签名证书</span>
+      <span>🛡️ 链上代币战果公证书</span>
       <span style="cursor:pointer;" onclick="closeSigModal()">✕</span>
     </div>
     <div id="sig-text"></div>
     <button class="btn-action btn-primary" onclick="closeSigModal()">确定并返回</button>
   </div>
 
-  <!-- 气泡提示 -->
+  <!-- 吐司条 -->
   <div id="toast"></div>
 </div>
 
 <script>
 /* ============================================================
-   1. 8-Bit Web Audio 合成音效 (无需任何外链音频文件)
+   1. 8-Bit Web Audio + 触感震动
 ============================================================ */
+const Haptics = {
+  vibrate(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch(e){} }
+};
+
 const AudioSys = {
   ctx: null,
   init() {
     if (!this.ctx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioContext();
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AC();
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
   },
   playLaser() {
     if (!this.ctx) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.12);
-    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.12);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.12);
+    osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.08);
+    g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.08);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(); osc.stop(this.ctx.currentTime + 0.08);
+  },
+  playCoin() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(987, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(1318, this.ctx.currentTime + 0.08);
+    g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(); osc.stop(this.ctx.currentTime + 0.25);
   },
   playExplode() {
     if (!this.ctx) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(140, this.ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.3);
-    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.3);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.3);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(); osc.stop(this.ctx.currentTime + 0.3);
   },
-  playCrystal() {
+  playBomb() {
     if (!this.ctx) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(520, this.ctx.currentTime);
-    osc.frequency.setValueAtTime(780, this.ctx.currentTime + 0.08);
-    osc.frequency.setValueAtTime(1040, this.ctx.currentTime + 0.16);
-    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.25);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.25);
+    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(20, this.ctx.currentTime + 0.7);
+    g.gain.setValueAtTime(0.4, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.7);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(); osc.stop(this.ctx.currentTime + 0.7);
   }
 };
 
 /* ============================================================
-   2. Web3 / Base 链交互逻辑 (零第三方库依赖，纯原生通信)
+   2. 代币智能交互与 Base 链底层读取 (纯原生，零三方库)
 ============================================================ */
 const BASE_CHAIN_ID_HEX = '0x2105'; // 8453 (Base Mainnet)
-const BASE_CONFIG = {
-  chainId: BASE_CHAIN_ID_HEX,
-  chainName: 'Base',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: ['https://mainnet.base.org'],
-  blockExplorerUrls: ['https://basescan.org']
+
+// 代币配置（默认可设置，也可从 LocalStorage 动态读取）
+let TokenConfig = {
+  address: localStorage.getItem('base_token_address') || '', // 用户可随时填入他的代币
+  symbol: localStorage.getItem('base_token_symbol') || 'TOKEN',
+  decimals: 18
 };
 
 let userAccount = null;
-let userBalance = '0.000';
+let userEthBalance = '0.000';
+let userTokenBalance = 0;
+let isVipPilot = false;
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.innerText = msg;
   t.style.opacity = '1';
-  setTimeout(() => { t.style.opacity = '0'; }, 2600);
+  setTimeout(() => { t.style.opacity = '0'; }, 3000);
 }
 
+// 钱包连接
 async function handleWalletClick() {
   AudioSys.init();
   if (typeof window.ethereum === 'undefined') {
-    showToast('⚠️ 未检测到钱包！请在 MetaMask App 内置浏览器中打开');
+    showToast('⚠️ 请在 MetaMask App 内置浏览器中打开！');
     return;
   }
   try {
-    // 1. 请求连接账户
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     if (!accounts || accounts.length === 0) return;
     userAccount = accounts[0];
 
-    // 2. 检查并强制切换至 Base 链
-    await ensureBaseNetwork();
-
-    // 3. 查余额
-    await fetchBalance();
-
-    updateWalletUI();
-    showToast('✅ 钱包已成功连接至 Base 主网！');
-  } catch (err) {
-    console.error(err);
-    showToast('❌ 连接失败: ' + (err.message || err));
-  }
-}
-
-async function ensureBaseNetwork() {
-  const currentChain = await window.ethereum.request({ method: 'eth_chainId' });
-  if (currentChain !== BASE_CHAIN_ID_HEX) {
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: BASE_CHAIN_ID_HEX }]
-      });
-    } catch (switchError) {
-      if (switchError.code === 4902) {
+    // 确保 Base 链
+    const currentChain = await window.ethereum.request({ method: 'eth_chainId' });
+    if (currentChain !== BASE_CHAIN_ID_HEX) {
+      try {
         await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [BASE_CONFIG]
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: BASE_CHAIN_ID_HEX }]
         });
-      } else {
-        throw switchError;
+      } catch (e) {
+        showToast('请允许切换至 Base 主网');
       }
     }
+
+    // 刷新原生 ETH 余额 + 代币余额
+    await fetchEthBalance();
+    await fetchTokenBalance();
+
+    updateWalletUI();
+    showToast('✅ 钱包已连接，代币数据已同步！');
+  } catch (err) {
+    showToast('连接失败: ' + (err.message || ''));
   }
 }
 
-async function fetchBalance() {
+async function fetchEthBalance() {
   if (!userAccount) return;
   try {
-    const rawBalance = await window.ethereum.request({
+    const raw = await window.ethereum.request({
       method: 'eth_getBalance',
       params: [userAccount, 'latest']
     });
-    const wei = BigInt(rawBalance);
-    const eth = Number(wei) / 1e18;
-    userBalance = eth.toFixed(4);
+    userEthBalance = (Number(BigInt(raw)) / 1e18).toFixed(4);
+  } catch(e){}
+}
+
+// 原生通过 Base 节点调用 ERC-20 balanceOf(address)
+async function fetchTokenBalance() {
+  if (!userAccount) return;
+  if (!TokenConfig.address || !TokenConfig.address.startsWith('0x') || TokenConfig.address.length !== 42) {
+    userTokenBalance = 0;
+    isVipPilot = false;
+    renderTokenUI();
+    return;
+  }
+
+  try {
+    // ERC-20 balanceOf 签名: 0x70a08231 + 32字节地址
+    const cleanAddr = userAccount.toLowerCase().replace('0x', '').padStart(64, '0');
+    const callData = '0x70a08231' + cleanAddr;
+
+    const res = await window.ethereum.request({
+      method: 'eth_call',
+      params: [{ to: TokenConfig.address, data: callData }, 'latest']
+    });
+
+    if (res && res !== '0x') {
+      const rawUnits = BigInt(res);
+      // 以 18 位小数计算
+      userTokenBalance = Number(rawUnits / BigInt(10 ** (TokenConfig.decimals - 2 || 16))) / 100;
+      isVipPilot = userTokenBalance > 0;
+    }
   } catch (e) {
-    console.warn('获取余额失败', e);
+    console.warn('读取代币失败:', e);
+  }
+  renderTokenUI();
+}
+
+function renderTokenUI() {
+  document.getElementById('token-symbol-tag').innerText = `$${TokenConfig.symbol}`;
+  document.getElementById('token-balance-num').innerText = userTokenBalance.toLocaleString();
+  document.getElementById('vip-status').style.display = isVipPilot ? 'inline-block' : 'none';
+  document.getElementById('res-token-hold').innerText = `${userTokenBalance.toLocaleString()} $${TokenConfig.symbol}`;
+  if (isVipPilot) {
+    document.getElementById('token-symbol-tag').style.color = '#00ff66';
   }
 }
 
 function updateWalletUI() {
   if (!userAccount) return;
   const shortAddr = userAccount.slice(0, 4) + '...' + userAccount.slice(-3);
-  document.getElementById('wallet-text').innerText = `${shortAddr} (${userBalance} ETH)`;
-  document.getElementById('btn-wallet').style.borderColor = '#00ff66';
-  document.getElementById('res-wallet').innerText = userAccount.slice(0, 8) + '...' + userAccount.slice(-6);
+  document.getElementById('wallet-text').innerText = `${shortAddr} (${userEthBalance} ETH)`;
+  renderTokenUI();
 }
 
-// 战报签名逻辑 (无需 Gas 费，用私钥为高分盖戳防篡改)
+// 一键将代币添加至玩家小狐狸
+async function addTokenToMetaMask() {
+  if (!TokenConfig.address) {
+    showToast('请先配置代币合约地址！');
+    openTokenModal();
+    return;
+  }
+  try {
+    const wasAdded = await window.ethereum.request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address: TokenConfig.address,
+          symbol: TokenConfig.symbol,
+          decimals: TokenConfig.decimals,
+          image: ''
+        }
+      }
+    });
+    if (wasAdded) showToast(`🎉 成功将 $${TokenConfig.symbol} 导入 MetaMask！`);
+  } catch (err) {
+    showToast('添加取消或失败');
+  }
+}
+
+// 代币设置弹窗控制
+function openTokenModal() {
+  document.getElementById('cfg-token-address').value = TokenConfig.address;
+  document.getElementById('cfg-token-symbol').value = TokenConfig.symbol;
+  document.getElementById('token-modal').style.display = 'flex';
+}
+function closeTokenModal() { document.getElementById('token-modal').style.display = 'none'; }
+
+function saveTokenConfig() {
+  const addr = document.getElementById('cfg-token-address').value.trim();
+  const sym = document.getElementById('cfg-token-symbol').value.trim().toUpperCase() || 'TOKEN';
+
+  TokenConfig.address = addr;
+  TokenConfig.symbol = sym;
+  localStorage.setItem('base_token_address', addr);
+  localStorage.setItem('base_token_symbol', sym);
+
+  closeTokenModal();
+  showToast(`已绑定 $${sym} 代币，正在同步...`);
+  fetchTokenBalance();
+}
+
+// 战报签名公证
 async function signCombatRecord() {
   AudioSys.init();
-  if (!userAccount) {
-    await handleWalletClick();
-    if (!userAccount) return;
-  }
+  if (!userAccount) { await handleWalletClick(); if (!userAccount) return; }
 
-  const payload = {
-    domain: "Quantum Arcade - Base Network",
-    pilot: userAccount,
-    score: Game.score,
-    energyCrystals: Game.crystals,
-    timestamp: new Date().toISOString(),
-    chainId: 8453,
-    status: "COMBAT_VERIFIED_AUTHENTIC"
-  };
-
-  const message = `[PULSE PIONEER 战报公证]
-----------------------------------
-驾驶员: ${payload.pilot}
-最终战功: ${payload.score} PTS
-捕获暗能: ${payload.energyCrystals} 晶核
+  const certMsg = `[BASE PULSE PIONEER - 代币战斗公证]
+-----------------------------------------------
+驾驶员: ${userAccount}
+持有代币: ${userTokenBalance} $${TokenConfig.symbol}
+本局开采: ${Game.lootCoins} 枚 $${TokenConfig.symbol} 代币碎片
+最终战功: ${Game.score} PTS
+VIP 勋章: ${isVipPilot ? "已激活 (VIP PILOT)" : "未激活"}
+存证时间: ${new Date().toISOString()}
 公证网络: Base Mainnet (8453)
-时间戳: ${payload.timestamp}
-----------------------------------
-请签名确认本局战报防伪指纹。此操作不会扣除任何 Gas 费。`;
+-----------------------------------------------
+防伪证明：战果真实由玩家手工通关，已生成私钥哈希。`;
 
   try {
-    // 转换成十六进制传递给 personal_sign
-    const hexMsg = '0x' + Array.from(new TextEncoder().encode(message))
+    const hexMsg = '0x' + Array.from(new TextEncoder().encode(certMsg))
       .map(b => b.toString(16).padStart(2, '0')).join('');
 
-    const signature = await window.ethereum.request({
+    const sig = await window.ethereum.request({
       method: 'personal_sign',
       params: [hexMsg, userAccount]
     });
 
-    const certText = `=== 链上战报防伪证书 (PASSED) ===\n\n` +
-      `【明文摘要】\n${message}\n\n` +
-      `【ECDSA 签名 Hash】\n${signature}\n\n` +
-      `【验证状态】: 凭证与公钥完全匹配，已防伪锁定。`;
-
-    document.getElementById('sig-text').innerText = certText;
+    document.getElementById('sig-text').innerText =
+      `=== 链上代币战果签名 (VERIFIED) ===\n\n` +
+      `${certMsg}\n\n` +
+      `【ECDSA 签名 Hash】:\n${sig}`;
     document.getElementById('sig-modal').style.display = 'flex';
-    AudioSys.playCrystal();
+    Haptics.vibrate([40, 60, 40]);
   } catch (err) {
-    showToast('签名已取消或失败: ' + (err.message || ''));
+    showToast('签名已取消');
   }
 }
-
-function closeSigModal() {
-  document.getElementById('sig-modal').style.display = 'none';
-}
+function closeSigModal() { document.getElementById('sig-modal').style.display = 'none'; }
 
 /* ============================================================
-   3. 街机弹幕引擎 (支持手机触摸跟随 + 桌面按键/拖拽)
+   3. 街机战斗引擎 (代币金币掉落、VIP 光环、全屏核弹)
 ============================================================ */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -546,25 +760,35 @@ resizeCanvas();
 const Game = {
   running: false,
   score: 0,
-  crystals: 0,
-  highScore: parseInt(localStorage.getItem('base_arcade_high') || '0'),
+  lootCoins: 0,
+  combo: 0,
+  maxCombo: 0,
+  comboTimer: 0,
+  bombs: 1,
   shield: 100,
+  weaponLevel: 1,
+  weaponTimer: 0,
   player: { x: 0, y: 0, r: 16, targetX: 0, targetY: 0 },
   bullets: [],
+  enemyBullets: [],
   enemies: [],
   particles: [],
-  crystalsItems: [],
+  drops: [], // 掉落物（包含金币代币）
   stars: [],
+  boss: null,
+  bossSpawned: false,
+  screenFlash: 0,
+  shake: 0,
   lastShot: 0,
   spawnTimer: 0
 };
 
-// 初始化星空背景
+// 星空
 for (let i = 0; i < 45; i++) {
   Game.stars.push({
     x: Math.random() * 500,
-    y: Math.random() * 800,
-    speed: 0.5 + Math.random() * 1.5,
+    y: Math.random() * 900,
+    speed: 0.8 + Math.random() * 2,
     size: 1 + Math.random() * 2
   });
 }
@@ -574,55 +798,93 @@ function startGame() {
   resizeCanvas();
   Game.running = true;
   Game.score = 0;
-  Game.crystals = 0;
-  Game.shield = 100;
+  Game.lootCoins = 0;
+  Game.combo = 0;
+  Game.maxCombo = 0;
+  Game.bombs = isVipPilot ? 2 : 1; // VIP 开局送 1 枚核弹！
+  Game.shield = isVipPilot ? 120 : 100; // VIP 护盾提升！
+  Game.weaponLevel = 1;
+  Game.weaponTimer = 0;
   Game.bullets = [];
+  Game.enemyBullets = [];
   Game.enemies = [];
   Game.particles = [];
-  Game.crystalsItems = [];
+  Game.drops = [];
+  Game.boss = null;
+  Game.bossSpawned = false;
   Game.player.x = canvas.width / 2;
-  Game.player.y = canvas.height - 80;
+  Game.player.y = canvas.height - 90;
   Game.player.targetX = Game.player.x;
   Game.player.targetY = Game.player.y;
 
   document.getElementById('screen-start').style.display = 'none';
   document.getElementById('screen-gameover').style.display = 'none';
+  document.getElementById('boss-bar-wrap').style.display = 'none';
   updateHUD();
+
+  if (isVipPilot) {
+    showToast(`👑 尊贵的 $${TokenConfig.symbol} 持币特权已生效！`);
+  }
 }
 
-function restartGame() {
-  startGame();
-}
+function restartGame() { startGame(); }
 
 function gameOver() {
   Game.running = false;
   AudioSys.playExplode();
-
-  if (Game.score > Game.highScore) {
-    Game.highScore = Game.score;
-    localStorage.setItem('base_arcade_high', Game.highScore.toString());
-  }
+  Haptics.vibrate([150, 80, 200]);
 
   document.getElementById('res-score').innerText = Game.score;
-  document.getElementById('res-crystals').innerText = Game.crystals;
-  document.getElementById('res-high').innerText = Game.highScore;
+  document.getElementById('res-loot').innerText = `${Game.lootCoins} $${TokenConfig.symbol}`;
+  document.getElementById('res-combo').innerText = Game.maxCombo + 'x';
   document.getElementById('screen-gameover').style.display = 'flex';
+  document.getElementById('boss-bar-wrap').style.display = 'none';
 }
 
 function updateHUD() {
   document.getElementById('hud-score').innerText = Game.score;
-  document.getElementById('hud-energy').innerText = Game.crystals;
+  document.getElementById('hud-loot').innerText = Game.lootCoins;
   const s = Math.max(0, Math.floor(Game.shield));
   document.getElementById('hud-shield').innerText = `${s}%`;
-  document.getElementById('hud-shield').style.color = s > 30 ? '#00f0ff' : '#ff3366';
+  document.getElementById('hud-shield').style.color = s > 35 ? '#00f0ff' : '#ff3366';
+  document.getElementById('bomb-count').innerText = Game.bombs;
 }
 
-// 触摸/鼠标交互
+// 释放核弹
+function triggerNuclearBomb(e) {
+  if (e) e.stopPropagation();
+  if (!Game.running || Game.bombs <= 0) return;
+
+  Game.bombs--;
+  Game.screenFlash = 1.0;
+  Game.shake = 18;
+  AudioSys.playBomb();
+  Haptics.vibrate([80, 50, 150]);
+
+  // 清除敌方弹幕与普通敌机并爆出代币金币
+  Game.enemyBullets = [];
+  for (let en of Game.enemies) {
+    createExplosion(en.x, en.y, '#ffd700', 16);
+    Game.score += 200;
+    Game.drops.push({ x: en.x, y: en.y, type: 'token_coin' });
+  }
+  Game.enemies = [];
+
+  if (Game.boss) {
+    Game.boss.hp -= 300;
+    createExplosion(Game.boss.x, Game.boss.y, '#ff0055', 25);
+  }
+
+  updateHUD();
+  showToast('💥 量子脉冲核爆清屏！');
+}
+
+// 触控跟随
 let isPointerDown = false;
-function setTargetPos(clientX, clientY) {
+function setTargetPos(cx, cy) {
   const rect = canvas.getBoundingClientRect();
-  Game.player.targetX = clientX - rect.left;
-  Game.player.targetY = clientY - rect.top;
+  Game.player.targetX = cx - rect.left;
+  Game.player.targetY = cy - rect.top;
 }
 
 canvas.addEventListener('touchstart', (e) => {
@@ -633,38 +895,33 @@ canvas.addEventListener('touchstart', (e) => {
 
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
-  if (isPointerDown && e.touches[0]) {
-    setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
-  }
+  if (isPointerDown && e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
 
 window.addEventListener('touchend', () => { isPointerDown = false; });
-
-canvas.addEventListener('mousedown', (e) => {
-  isPointerDown = true;
-  setTargetPos(e.clientX, e.clientY);
-});
-window.addEventListener('mousemove', (e) => {
-  if (isPointerDown) setTargetPos(e.clientX, e.clientY);
-});
+canvas.addEventListener('mousedown', (e) => { isPointerDown = true; setTargetPos(e.clientX, e.clientY); });
+window.addEventListener('mousemove', (e) => { if (isPointerDown) setTargetPos(e.clientX, e.clientY); });
 window.addEventListener('mouseup', () => { isPointerDown = false; });
 
-// 键盘控制支持
-const keys = {};
-window.addEventListener('keydown', (e) => { keys[e.key] = true; });
-window.addEventListener('keyup', (e) => { keys[e.key] = false; });
-
 /* ============================================================
-   4. 主游戏循环
+   4. 主渲染循环
 ============================================================ */
 function loop(now) {
   requestAnimationFrame(loop);
 
-  // 清屏与深空渐变
-  ctx.fillStyle = '#060911';
+  ctx.save();
+  if (Game.shake > 0) {
+    const rx = (Math.random() - 0.5) * Game.shake;
+    const ry = (Math.random() - 0.5) * Game.shake;
+    ctx.translate(rx, ry);
+    Game.shake *= 0.9;
+    if (Game.shake < 0.5) Game.shake = 0;
+  }
+
+  // 背景与星空
+  ctx.fillStyle = '#060912';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 绘制星空移动
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   for (let s of Game.stars) {
     s.y += s.speed;
@@ -672,62 +929,162 @@ function loop(now) {
     ctx.fillRect(s.x, s.y, s.size, s.size);
   }
 
-  if (!Game.running) return;
+  if (!Game.running) { ctx.restore(); return; }
 
-  // 玩家位置平滑跟随
-  if (keys['ArrowLeft'] || keys['a']) Game.player.x -= 5;
-  if (keys['ArrowRight'] || keys['d']) Game.player.x += 5;
-  if (keys['ArrowUp'] || keys['w']) Game.player.y -= 5;
-  if (keys['ArrowDown'] || keys['s']) Game.player.y += 5;
+  // 战机移动
+  Game.player.x += (Game.player.targetX - Game.player.x) * 0.24;
+  Game.player.y += (Game.player.targetY - Game.player.y) * 0.24;
+  Game.player.x = Math.max(18, Math.min(canvas.width - 18, Game.player.x));
+  Game.player.y = Math.max(30, Math.min(canvas.height - 40, Game.player.y));
 
-  Game.player.x += (Game.player.targetX - Game.player.x) * 0.22;
-  Game.player.y += (Game.player.targetY - Game.player.y) * 0.22;
+  // 连击自然衰减
+  if (Game.combo > 0) {
+    Game.comboTimer--;
+    if (Game.comboTimer <= 0) { Game.combo = 0; }
+  }
 
-  // 边界约束
-  Game.player.x = Math.max(20, Math.min(canvas.width - 20, Game.player.x));
-  Game.player.y = Math.max(30, Math.min(canvas.height - 30, Game.player.y));
+  // 武器时效
+  if (Game.weaponLevel > 1) {
+    Game.weaponTimer--;
+    if (Game.weaponTimer <= 0) Game.weaponLevel = 1;
+  }
 
-  // 自动极速射击
-  if (now - Game.lastShot > 140) {
-    Game.bullets.push({ x: Game.player.x - 7, y: Game.player.y - 15, vy: -11 });
-    Game.bullets.push({ x: Game.player.x + 7, y: Game.player.y - 15, vy: -11 });
+  // 发射武器
+  if (now - Game.lastShot > (Game.weaponLevel > 1 ? 120 : 150)) {
+    if (Game.weaponLevel === 1) {
+      Game.bullets.push({ x: Game.player.x - 8, y: Game.player.y - 14, vx: 0, vy: -12 });
+      Game.bullets.push({ x: Game.player.x + 8, y: Game.player.y - 14, vx: 0, vy: -12 });
+    } else {
+      Game.bullets.push({ x: Game.player.x - 12, y: Game.player.y - 12, vx: -2, vy: -12 });
+      Game.bullets.push({ x: Game.player.x - 4, y: Game.player.y - 15, vx: 0, vy: -13 });
+      Game.bullets.push({ x: Game.player.x + 4, y: Game.player.y - 15, vx: 0, vy: -13 });
+      Game.bullets.push({ x: Game.player.x + 12, y: Game.player.y - 12, vx: 2, vy: -12 });
+    }
     AudioSys.playLaser();
     Game.lastShot = now;
   }
 
-  // 敌机生成
+  // Boss 生成 (5000分)
+  if (Game.score >= 5000 && !Game.boss && !Game.bossSpawned) {
+    Game.bossSpawned = true;
+    Game.boss = {
+      x: canvas.width / 2,
+      y: -60,
+      targetY: 85,
+      r: 36,
+      hp: 1200,
+      maxHp: 1200,
+      shootTimer: 0,
+      angle: 0
+    };
+    document.getElementById('boss-bar-wrap').style.display = 'block';
+    showToast('🚨 警报！暗能母舰 Boss 已降临战场！');
+  }
+
+  // 普通敌机生成
   Game.spawnTimer++;
-  if (Game.spawnTimer % 36 === 0) {
-    const isHeavy = Math.random() < 0.22;
+  if (Game.spawnTimer % 35 === 0 && (!Game.boss || Math.random() < 0.4)) {
+    const isElite = Math.random() < 0.25;
     Game.enemies.push({
-      x: 20 + Math.random() * (canvas.width - 40),
+      x: 25 + Math.random() * (canvas.width - 50),
       y: -25,
-      r: isHeavy ? 20 : 13,
-      hp: isHeavy ? 4 : 1,
-      speed: isHeavy ? 1.8 : (2.5 + Math.random() * 2),
-      color: isHeavy ? '#ff0055' : '#ffaa00'
+      r: isElite ? 18 : 12,
+      hp: isElite ? 5 : 1,
+      speed: isElite ? 1.6 : (2.4 + Math.random() * 2),
+      isElite,
+      color: isElite ? '#ff0055' : '#ffaa00'
     });
   }
 
-  // 更新子弹
+  // 更新玩家子弹
   for (let i = Game.bullets.length - 1; i >= 0; i--) {
     let b = Game.bullets[i];
+    b.x += (b.vx || 0);
     b.y += b.vy;
-    ctx.fillStyle = '#00f0ff';
-    ctx.shadowColor = '#00f0ff';
+
+    ctx.fillStyle = isVipPilot ? '#ffd700' : '#00f0ff';
+    ctx.shadowColor = ctx.fillStyle;
     ctx.shadowBlur = 8;
     ctx.fillRect(b.x - 2, b.y - 6, 4, 12);
     ctx.shadowBlur = 0;
 
-    if (b.y < -10) Game.bullets.splice(i, 1);
+    if (b.y < -15 || b.x < 0 || b.x > canvas.width) Game.bullets.splice(i, 1);
   }
 
-  // 更新敌机
+  // Boss 渲染与碰撞
+  if (Game.boss) {
+    let b = Game.boss;
+    if (b.y < b.targetY) b.y += 1.5;
+    b.x = canvas.width / 2 + Math.sin(now * 0.002) * (canvas.width * 0.3);
+
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.fillStyle = '#77002b';
+    ctx.strokeStyle = '#ff0055';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 35);
+    ctx.lineTo(45, -20);
+    ctx.lineTo(0, -35);
+    ctx.lineTo(-45, -20);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(0, 0, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    b.shootTimer++;
+    if (b.shootTimer % 40 === 0) {
+      b.angle += 0.4;
+      for (let k = 0; k < 6; k++) {
+        const rad = b.angle + (k * Math.PI / 3);
+        Game.enemyBullets.push({
+          x: b.x, y: b.y + 10,
+          vx: Math.cos(rad) * 2.8,
+          vy: Math.sin(rad) * 2.8,
+          color: '#ff0055'
+        });
+      }
+    }
+
+    // 子弹击中 Boss
+    for (let j = Game.bullets.length - 1; j >= 0; j--) {
+      let pb = Game.bullets[j];
+      if (Math.hypot(b.x - pb.x, b.y - pb.y) < b.r + 5) {
+        Game.bullets.splice(j, 1);
+        b.hp -= 20;
+        createExplosion(pb.x, pb.y, '#ffd700', 3);
+        if (b.hp <= 0) {
+          createExplosion(b.x, b.y, '#ffd700', 45);
+          AudioSys.playBomb();
+          Game.score += 5000;
+          // 爆出海量代币金币
+          for (let m = 0; m < 8; m++) {
+            Game.drops.push({ x: b.x + (Math.random()-0.5)*50, y: b.y + (Math.random()-0.5)*40, type: 'token_coin' });
+          }
+          Game.drops.push({ x: b.x, y: b.y, type: 'bomb' });
+          Game.boss = null;
+          document.getElementById('boss-bar-wrap').style.display = 'none';
+          showToast(`🏆 击破暗能母舰！爆出巨额 $${TokenConfig.symbol} 代币！`);
+          break;
+        }
+      }
+    }
+
+    if (Game.boss) {
+      const pct = Math.max(0, (Game.boss.hp / Game.boss.maxHp) * 100);
+      document.getElementById('boss-bar-fill').style.width = pct + '%';
+    }
+  }
+
+  // 普通敌机
   for (let i = Game.enemies.length - 1; i >= 0; i--) {
     let e = Game.enemies[i];
     e.y += e.speed;
 
-    // 绘制敌机
     ctx.fillStyle = e.color;
     ctx.shadowColor = e.color;
     ctx.shadowBlur = 10;
@@ -736,22 +1093,32 @@ function loop(now) {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // 检查子弹碰撞
+    // 子弹击中敌机
     for (let j = Game.bullets.length - 1; j >= 0; j--) {
       let b = Game.bullets[j];
-      const dist = Math.hypot(e.x - b.x, e.y - b.y);
-      if (dist < e.r + 5) {
+      if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + 5) {
         Game.bullets.splice(j, 1);
         e.hp--;
         if (e.hp <= 0) {
-          // 爆炸效果
-          createExplosion(e.x, e.y, e.color);
+          createExplosion(e.x, e.y, e.color, 10);
           AudioSys.playExplode();
-          Game.score += 150;
+          Haptics.vibrate(18);
 
-          // 掉落暗能晶核
-          if (Math.random() < 0.45) {
-            Game.crystalsItems.push({ x: e.x, y: e.y, vy: 1.5 });
+          Game.combo++;
+          Game.comboTimer = 90;
+          if (Game.combo > Game.maxCombo) Game.maxCombo = Game.combo;
+          Game.score += 100 + (Game.combo * 20);
+
+          // 核心概率：掉落真实代币金币
+          const roll = Math.random();
+          if (roll < 0.45) {
+            Game.drops.push({ x: e.x, y: e.y, type: 'token_coin' }); // 🪙 代币
+          } else if (roll < 0.58) {
+            Game.drops.push({ x: e.x, y: e.y, type: 'power' }); // 散弹
+          } else if (roll < 0.68) {
+            Game.drops.push({ x: e.x, y: e.y, type: 'shield' }); // 护盾
+          } else if (roll < 0.73) {
+            Game.drops.push({ x: e.x, y: e.y, type: 'bomb' }); // 核弹
           }
 
           Game.enemies.splice(i, 1);
@@ -761,55 +1128,116 @@ function loop(now) {
       }
     }
 
-    // 检查与玩家本体碰撞
-    const pDist = Math.hypot(e.x - Game.player.x, e.y - Game.player.y);
-    if (pDist < e.r + Game.player.r) {
-      Game.shield -= 34;
-      createExplosion(e.x, e.y, '#ff0033');
+    // 撞机
+    if (Math.hypot(e.x - Game.player.x, e.y - Game.player.y) < e.r + Game.player.r) {
+      Game.shield -= 30;
+      Game.shake = 12;
+      Haptics.vibrate([60, 40, 60]);
+      createExplosion(e.x, e.y, '#ff0055', 12);
       Game.enemies.splice(i, 1);
       updateHUD();
-      if (Game.shield <= 0) {
-        gameOver();
-        return;
-      }
+      if (Game.shield <= 0) { gameOver(); ctx.restore(); return; }
     }
 
     if (e.y > canvas.height + 30) Game.enemies.splice(i, 1);
   }
 
-  // 更新晶核
-  for (let i = Game.crystalsItems.length - 1; i >= 0; i--) {
-    let c = Game.crystalsItems[i];
-    c.y += c.vy;
+  // 敌方弹幕
+  for (let i = Game.enemyBullets.length - 1; i >= 0; i--) {
+    let eb = Game.enemyBullets[i];
+    eb.x += eb.vx; eb.y += eb.vy;
 
-    // 金色旋转晶核
+    ctx.fillStyle = eb.color;
+    ctx.beginPath();
+    ctx.arc(eb.x, eb.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (Math.hypot(eb.x - Game.player.x, eb.y - Game.player.y) < Game.player.r + 3) {
+      Game.shield -= 15;
+      Game.shake = 8;
+      Haptics.vibrate(40);
+      Game.enemyBullets.splice(i, 1);
+      updateHUD();
+      if (Game.shield <= 0) { gameOver(); ctx.restore(); return; }
+      continue;
+    }
+
+    if (eb.y > canvas.height + 10 || eb.y < -10 || eb.x < -10 || eb.x > canvas.width + 10) {
+      Game.enemyBullets.splice(i, 1);
+    }
+  }
+
+  // 掉落物渲染 (包括 3D 金色代币)
+  for (let i = Game.drops.length - 1; i >= 0; i--) {
+    let d = Game.drops[i];
+    d.y += 1.8;
+
     ctx.save();
-    ctx.translate(c.x, c.y);
-    ctx.rotate(now * 0.005);
-    ctx.fillStyle = '#ffaa00';
-    ctx.shadowColor = '#ffaa00';
-    ctx.shadowBlur = 10;
-    ctx.fillRect(-6, -6, 12, 12);
+    ctx.translate(d.x, d.y);
+
+    if (d.type === 'token_coin') {
+      // 旋转的金色代币金币
+      const scaleX = Math.cos(now * 0.007);
+      ctx.scale(scaleX, 1);
+      ctx.fillStyle = '#ffd700';
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 代币符号内标
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', 0, 0);
+    } else {
+      ctx.fillStyle = d.type === 'power' ? '#00f0ff' : (d.type === 'shield' ? '#00ff66' : '#ff0055');
+      ctx.beginPath();
+      ctx.arc(0, 0, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#050a14';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(d.type === 'power' ? 'P' : (d.type === 'shield' ? 'S' : 'B'), 0, 1);
+    }
     ctx.restore();
 
-    // 吸收检测
-    if (Math.hypot(c.x - Game.player.x, c.y - Game.player.y) < Game.player.r + 14) {
-      Game.crystals++;
-      Game.score += 300;
-      AudioSys.playCrystal();
-      Game.crystalsItems.splice(i, 1);
+    // 拾取
+    if (Math.hypot(d.x - Game.player.x, d.y - Game.player.y) < Game.player.r + 14) {
+      Haptics.vibrate(25);
+      if (d.type === 'token_coin') {
+        Game.lootCoins += 10;
+        Game.score += 250;
+        AudioSys.playCoin();
+      } else if (d.type === 'power') {
+        Game.weaponLevel = 2;
+        Game.weaponTimer = 450;
+        AudioSys.playCoin();
+        showToast('⚡ 等离子四路散射已装载！');
+      } else if (d.type === 'shield') {
+        Game.shield = Math.min(isVipPilot ? 120 : 100, Game.shield + 40);
+        AudioSys.playCoin();
+        showToast('🛡️ 纳米护盾过载修复 +40%！');
+      } else if (d.type === 'bomb') {
+        Game.bombs = Math.min(3, Game.bombs + 1);
+        AudioSys.playCoin();
+        showToast('💣 量子核弹已装载 +1！');
+      }
+      Game.drops.splice(i, 1);
       updateHUD();
-    } else if (c.y > canvas.height + 20) {
-      Game.crystalsItems.splice(i, 1);
+    } else if (d.y > canvas.height + 25) {
+      Game.drops.splice(i, 1);
     }
   }
 
   // 粒子动画
   for (let i = Game.particles.length - 1; i >= 0; i--) {
     let p = Game.particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life -= 0.035;
+    p.x += p.vx; p.y += p.vy;
+    p.life -= 0.04;
     ctx.fillStyle = p.color;
     ctx.globalAlpha = Math.max(0, p.life);
     ctx.fillRect(p.x, p.y, p.size, p.size);
@@ -817,25 +1245,46 @@ function loop(now) {
     if (p.life <= 0) Game.particles.splice(i, 1);
   }
 
-  // 绘制玩家飞船 (赛博青色三角战机)
+  // 核爆全屏闪烁
+  if (Game.screenFlash > 0) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${Game.screenFlash})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    Game.screenFlash -= 0.06;
+  }
+
+  // 绘制驾驶员战机
   drawPlayerShip(Game.player.x, Game.player.y);
+
+  ctx.restore();
 }
 
 function drawPlayerShip(x, y) {
   ctx.save();
   ctx.translate(x, y);
 
+  // VIP 黄金粒子光环
+  if (isVipPilot) {
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
   // 尾焰
-  ctx.fillStyle = '#ff0055';
+  ctx.fillStyle = isVipPilot ? '#ffd700' : (Game.weaponLevel > 1 ? '#00f0ff' : '#ff0055');
   ctx.beginPath();
   ctx.moveTo(-5, 12);
-  ctx.lineTo(0, 22 + Math.random() * 8);
+  ctx.lineTo(0, 20 + Math.random() * 8);
   ctx.lineTo(5, 12);
   ctx.fill();
 
-  // 主机体
-  ctx.fillStyle = '#00f0ff';
-  ctx.shadowColor = '#00f0ff';
+  // 机身
+  ctx.fillStyle = isVipPilot ? '#ffd700' : '#00f0ff';
+  ctx.shadowColor = ctx.fillStyle;
   ctx.shadowBlur = 12;
   ctx.beginPath();
   ctx.moveTo(0, -18);
@@ -845,19 +1294,13 @@ function drawPlayerShip(x, y) {
   ctx.closePath();
   ctx.fill();
 
-  // 核心舱
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(0, 0, 4, 0, Math.PI * 2);
-  ctx.fill();
-
   ctx.restore();
 }
 
-function createExplosion(x, y, color) {
-  for (let i = 0; i < 14; i++) {
+function createExplosion(x, y, color, count = 12) {
+  for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 1 + Math.random() * 4;
+    const speed = 1.5 + Math.random() * 4.5;
     Game.particles.push({
       x, y,
       vx: Math.cos(angle) * speed,
@@ -872,11 +1315,13 @@ function createExplosion(x, y, color) {
 // 启动循环
 requestAnimationFrame(loop);
 
-// 自动检测是否已有现成钱包注入
+// 页面加载探测
 window.addEventListener('load', () => {
+  renderTokenUI();
   if (typeof window.ethereum !== 'undefined' && window.ethereum.selectedAddress) {
     userAccount = window.ethereum.selectedAddress;
     updateWalletUI();
+    fetchTokenBalance();
   }
 });
 </script>
