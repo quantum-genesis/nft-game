@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Pulse Pioneer: Base 脉冲先锋 V6</title>
+  <title>Pulse Pioneer: Base 脉冲先锋 V8 (HD Mech Edition)</title>
   <style>
     :root {
       --base-blue: #0052ff;
@@ -11,9 +11,10 @@
       --neon-pink: #ff007f;
       --neon-amber: #ffaa00;
       --neon-green: #00ff66;
+      --neon-purple: #b026ff;
       --gold-token: #ffd700;
-      --bg-dark: #07090e;
-      --card-bg: rgba(13, 17, 28, 0.94);
+      --bg-dark: #05070c;
+      --card-bg: rgba(11, 15, 26, 0.95);
     }
     * {
       box-sizing: border-box;
@@ -39,7 +40,7 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at 50% 30%, #0d162d 0%, var(--bg-dark) 100%);
+      background: radial-gradient(circle at 50% 30%, #0c1428 0%, var(--bg-dark) 100%);
     }
 
     /* 顶部 Web3 状态栏 */
@@ -162,29 +163,41 @@
       justify-content: space-between;
       pointer-events: none;
       font-family: monospace;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       text-shadow: 0 0 6px rgba(0, 240, 255, 0.8);
       z-index: 5;
     }
 
-    /* 狂暴能量槽 */
-    #fever-bar-wrap {
+    /* 顶部双槽：紫色经验槽 + 粉色狂暴槽 */
+    #bars-container {
       position: absolute;
-      top: 26px;
+      top: 24px;
       left: 10px;
       right: 10px;
-      height: 5px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 3px;
-      overflow: hidden;
-      border: 1px solid rgba(0, 240, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
       z-index: 5;
+    }
+    .bar-wrap {
+      height: 4px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    #xp-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #b026ff, #00f0ff);
+      box-shadow: 0 0 8px #b026ff;
+      transition: width 0.15s ease-out;
     }
     #fever-bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #00f0ff, #ff007f);
+      background: linear-gradient(90deg, #ff007f, #ffaa00);
       box-shadow: 0 0 8px #ff007f;
       transition: width 0.1s linear;
     }
@@ -192,13 +205,13 @@
     /* Boss 血条 */
     #boss-bar-wrap {
       position: absolute;
-      top: 38px;
+      top: 42px;
       left: 20px;
       right: 20px;
       background: rgba(0, 0, 0, 0.6);
       border: 1px solid #ff0055;
       border-radius: 6px;
-      height: 10px;
+      height: 9px;
       display: none;
       overflow: hidden;
       z-index: 6;
@@ -212,7 +225,7 @@
     }
     #boss-title-tag {
       position: absolute;
-      top: 50px;
+      top: 54px;
       width: 100%;
       text-align: center;
       font-size: 10px;
@@ -252,7 +265,7 @@
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(7, 9, 14, 0.94);
+      background: rgba(5, 7, 12, 0.94);
       backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
@@ -299,6 +312,96 @@
       color: var(--neon-cyan);
       font-family: monospace;
       font-size: 13px;
+    }
+
+    /* 肉鸽三选一升级弹窗 */
+    #screen-rogue-select {
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 40;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+    }
+    .rogue-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px var(--neon-purple);
+      margin-bottom: 2px;
+    }
+    .rogue-subtitle {
+      font-size: 11px;
+      color: var(--neon-purple);
+      margin-bottom: 14px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .rogue-cards-list {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .rogue-card {
+      background: linear-gradient(135deg, rgba(20, 28, 48, 0.95), rgba(10, 14, 25, 0.95));
+      border: 1px solid rgba(176, 38, 255, 0.4);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    .rogue-card:active {
+      transform: scale(0.97);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    }
+    .rogue-card-icon {
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: rgba(176, 38, 255, 0.15);
+      border: 1px solid var(--neon-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .rogue-card-info {
+      flex: 1;
+      text-align: left;
+    }
+    .rogue-card-name {
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .rogue-card-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.35;
+    }
+    .chip-tier {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--neon-cyan);
+      border: 1px solid var(--neon-cyan);
     }
 
     /* 结算评级勋章 */
@@ -507,13 +610,19 @@
     <!-- HUD 抬头显示 -->
     <div id="hud">
       <div>SCORE: <span id="hud-score" style="color:var(--neon-cyan)">0</span></div>
+      <div>TECH: <span id="hud-tech-lv" style="color:var(--neon-purple)">LV.1</span></div>
       <div>LOOT: <span id="hud-loot" style="color:var(--gold-token)">0</span></div>
       <div>SHIELD: <span id="hud-shield" style="color:#00f0ff">100%</span></div>
     </div>
 
-    <!-- 狂暴 Fever 充能条 -->
-    <div id="fever-bar-wrap">
-      <div id="fever-bar-fill"></div>
+    <!-- 顶部双槽：紫色经验槽 + 粉色狂暴槽 -->
+    <div id="bars-container">
+      <div class="bar-wrap" title="纳米经验槽">
+        <div id="xp-bar-fill"></div>
+      </div>
+      <div class="bar-wrap" title="狂暴过载槽">
+        <div id="fever-bar-fill"></div>
+      </div>
     </div>
     
     <!-- Boss 血条与称号 -->
@@ -529,15 +638,24 @@
     </div>
   </div>
 
+  <!-- P1 肉鸽战术芯片三选一弹窗 -->
+  <div id="screen-rogue-select">
+    <div class="rogue-title">CHIP MATRIX UPGRADE</div>
+    <div class="rogue-subtitle">✦ 战术网络升级 // 挑选装配芯片 ✦</div>
+    <div class="rogue-cards-list" id="rogue-cards-container">
+      <!-- 动态插入3张芯片卡片 -->
+    </div>
+  </div>
+
   <!-- 初始界面 -->
   <div class="overlay" id="screen-start">
-    <div class="title-glitch">PULSE PIONEER VI</div>
-    <div class="subtitle">BASE MAINNET // 链上极速脉冲空战</div>
+    <div class="title-glitch">PULSE PIONEER VIII</div>
+    <div class="subtitle">BASE MAINNET // 次世代机甲链上空战</div>
     
     <div class="card-box">
       <div style="color:var(--neon-cyan); font-weight:bold; margin-bottom:5px;">⛓️ 当前链上状态就绪：</div>
       <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>代币合约</b>：<code>0x0625...8aB6</code> (读取真余额)</p>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>战机 NFT</b>：<code>0xcBa0...b776</code> (持有人激活双僚机)</p>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>战机 NFT</b>：<code>0xcBa0...b776</code> (持有人激活黑金机神)</p>
       <p style="color:#94a3b8; font-size:11px;">• <b>战绩存证</b>：<code>0xE402...739b</code> (真实链上记分)</p>
     </div>
 
@@ -561,17 +679,16 @@
 
     <div class="card-box">
       <div class="stat-row"><span>本局最终得分</span><span class="stat-val" id="res-score">0</span></div>
+      <div class="stat-row"><span>机体战术等级</span><span class="stat-val" id="res-tech-lv" style="color:var(--neon-purple)">LV.1</span></div>
       <div class="stat-row"><span>本局开采碎片</span><span class="stat-val" id="res-loot" style="color:var(--gold-token)">0</span></div>
       <div class="stat-row"><span>最高连击 Combo</span><span class="stat-val" id="res-combo">0x</span></div>
       <div class="stat-row"><span>战机 NFT 认证</span><span class="stat-val" id="res-nft-status" style="color:var(--neon-cyan)">未持有</span></div>
     </div>
 
-    <!-- P0 杀手锏：一键生成战报海报分享 -->
     <button class="btn-action btn-share" onclick="showBattlePosterModal()">
       <span>📸</span> 生成赛博战报海报 (分享朋友圈/X)
     </button>
 
-    <!-- BaseScan 交易反馈卡 -->
     <div id="tx-feedback-card">
       <div>⛓️ 链上交易已广播！</div>
       <a id="tx-basescan-link" href="#" target="_blank">点击在 BaseScan 上验证这笔真实交易 ↗</a>
@@ -597,7 +714,7 @@
     </button>
   </div>
 
-  <!-- P0 海报弹窗 -->
+  <!-- 战报海报弹窗 -->
   <div id="poster-modal">
     <div id="poster-img-container">
       <img id="poster-preview-img" alt="战报海报" />
@@ -645,18 +762,19 @@
    1. 3 大真实 Base 主网合约配置
 ============================================================ */
 const CONTRACTS = {
-  TOKEN: "0x0625E5D6935b621F7f07014faAF73f9c1d388aB6", // ERC-20
-  NFT:   "0xcBa0df1F014b556c44E7DD25a6Db874b6B61b776", // 战机 NFT
-  GAME:  "0xE40285906A9f18B598a3cE4d51B5dEcB4c1d739b"  // 游戏记分
+  TOKEN: "0x0625E5D6935b621F7f07014faAF73f9c1d388aB6",
+  NFT:   "0xcBa0df1F014b556c44E7DD25a6Db874b6B61b776",
+  GAME:  "0xE40285906A9f18B598a3cE4d51B5dEcB4c1d739b"
 };
 
-const BASE_CHAIN_ID_HEX = '0x2105'; // 8453 Base
+const BASE_CHAIN_ID_HEX = '0x2105';
 
 let userAccount = null;
 let userEthBalance = '0.000';
 let userTokenBalance = 0;
 let userHasNFT = false;
 let isGamePaused = false;
+let isRogueSelecting = false;
 let currentRank = 'B';
 let currentPosterDataUrl = '';
 
@@ -684,7 +802,7 @@ const AudioSys = {
     this.init();
     const notes = [130.81, 155.56, 196.00, 261.63, 196.00, 155.56, 233.08, 174.61];
     this.bgmInterval = setInterval(() => {
-      if (!this.enabled || !Game.running || isGamePaused) return;
+      if (!this.enabled || !Game.running || isGamePaused || isRogueSelecting) return;
       const freq = notes[this.step % notes.length];
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -723,6 +841,18 @@ const AudioSys = {
     g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.2);
     osc.connect(g); g.connect(this.ctx.destination);
     osc.start(); osc.stop(this.ctx.currentTime + 0.2);
+  },
+  playLevelUp() {
+    if (!this.ctx || !this.enabled) return;
+    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(880, this.ctx.currentTime + 0.15);
+    osc.frequency.linearRampToValueAtTime(1320, this.ctx.currentTime + 0.35);
+    g.gain.setValueAtTime(0.25, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.4);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(); osc.stop(this.ctx.currentTime + 0.4);
   },
   playExplode() {
     if (!this.ctx || !this.enabled) return;
@@ -764,7 +894,7 @@ function showToast(msg) {
 }
 
 function togglePauseGame() {
-  if (!Game.running) return;
+  if (!Game.running || isRogueSelecting) return;
   isGamePaused = !isGamePaused;
   document.getElementById('screen-pause').style.display = isGamePaused ? 'flex' : 'none';
   document.getElementById('btn-pause').innerText = isGamePaused ? '▶️' : '⏸️';
@@ -807,14 +937,12 @@ async function syncOnChainData() {
   if (!userAccount) return;
   const shortAddr = userAccount.slice(0, 4) + '...' + userAccount.slice(-3);
   
-  // 1. ETH
   try {
     const rawEth = await window.ethereum.request({ method: 'eth_getBalance', params: [userAccount, 'latest'] });
     userEthBalance = (Number(BigInt(rawEth)) / 1e18).toFixed(4);
     document.getElementById('wallet-text').innerText = `${shortAddr} (${userEthBalance} ETH)`;
   } catch(e){}
 
-  // 2. 真实 ERC-20 代币余额
   try {
     const cleanAddr = userAccount.toLowerCase().replace('0x', '').padStart(64, '0');
     const callData = '0x70a08231' + cleanAddr;
@@ -831,7 +959,6 @@ async function syncOnChainData() {
   }
   document.getElementById('token-balance-num').innerText = userTokenBalance.toLocaleString();
 
-  // 3. 真实战机 NFT 所有权
   try {
     const cleanAddr = userAccount.toLowerCase().replace('0x', '').padStart(64, '0');
     const callData = '0x70a08231' + cleanAddr;
@@ -850,7 +977,7 @@ async function syncOnChainData() {
   const badge = document.getElementById('nft-status-badge');
   const mintBtn = document.getElementById('btn-mint-nft');
   if (userHasNFT) {
-    badge.innerText = '战机 NFT: 已持有 (VIP神机)';
+    badge.innerText = '战机 NFT: 已持有 (黑金神机)';
     badge.style.color = '#ffd700';
     badge.style.borderColor = '#ffd700';
     mintBtn.innerText = '✅ 你已持有链上认证战机 NFT';
@@ -873,11 +1000,7 @@ async function mintFighterNFT() {
     const mintData = '0x1249c58b';
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
-      params: [{
-        from: userAccount,
-        to: CONTRACTS.NFT,
-        data: mintData
-      }]
+      params: [{ from: userAccount, to: CONTRACTS.NFT, data: mintData }]
     });
     showBaseScanLink(txHash);
     showToast(`🎉 铸造交易已广播！正在等待 Base 确认...`);
@@ -893,14 +1016,9 @@ async function submitScoreToChain() {
   try {
     const scoreHex = Game.score.toString(16).padStart(64, '0');
     const submitData = '0xd09de08a' + scoreHex;
-
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
-      params: [{
-        from: userAccount,
-        to: CONTRACTS.GAME,
-        data: submitData
-      }]
+      params: [{ from: userAccount, to: CONTRACTS.GAME, data: submitData }]
     });
     showBaseScanLink(txHash);
     showToast(`🏆 战绩存证交易已广播！`);
@@ -937,13 +1055,110 @@ async function addTokenToMetaMask() {
 }
 
 function openNFTDetails() {
-  showToast(userHasNFT ? '👑 战机状态：链上真实持有，双僚机浮游炮已装载！' : '🛸 尚未持有战机 NFT，主页可免费铸造！');
+  showToast(userHasNFT ? '👑 战机状态：链上真实持有，黑金神机与双僚机已激活！' : '🛸 尚未持有战机 NFT，主页可免费铸造！');
 }
 function openContractsModal() { document.getElementById('contracts-modal').style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
 /* ============================================================
-   4. 战斗物理引擎 (含 P0 防遮挡悬浮算法)
+   4. P1 肉鸽战术芯片池定义 (Roguelite Pool)
+============================================================ */
+const ROGUE_CHIPS = [
+  {
+    id: 'chain_lightning',
+    name: '连锁高压电弧',
+    icon: '⚡',
+    tier: 'OFFENSE',
+    desc: '主炮击中敌机时，激发一道高压电弧额外电击临近敌机。',
+    apply: () => { Game.upgrades.chainLightning++; }
+  },
+  {
+    id: 'plasma_pierce',
+    name: '高能等离子穿透',
+    icon: '🔮',
+    tier: 'PIERCE',
+    desc: '主炮子弹获得穿透能力，可贯穿多个目标而不消失。',
+    apply: () => { Game.upgrades.piercing++; }
+  },
+  {
+    id: 'shield_nova',
+    name: '量子护盾冲击波',
+    icon: '🛡️',
+    tier: 'DEFENSE',
+    desc: '每隔 8 秒或受击时爆发环形脉冲，消解周围敌弹并震退敌机。',
+    apply: () => { Game.upgrades.shieldNova++; }
+  },
+  {
+    id: 'hyper_magnet',
+    name: '超维引力增强',
+    icon: '🧲',
+    tier: 'UTILITY',
+    desc: '掉落物自动吸附范围大幅提升 150%，吸附速度加快 50%。',
+    apply: () => { Game.upgrades.hyperMagnet++; }
+  },
+  {
+    id: 'overclock_rapid',
+    name: '极速超频核心',
+    icon: '🚀',
+    tier: 'SPEED',
+    desc: '全武器射速永久提升 30%，狂暴过载积蓄效率提升。',
+    apply: () => { Game.upgrades.rapidFire++; }
+  },
+  {
+    id: 'drone_matrix',
+    name: '僚机矩阵扩充',
+    icon: '🛸',
+    tier: 'DRONE',
+    desc: '直接激活护卫僚机；已有僚机则提升为高速散射模式！',
+    apply: () => { Game.upgrades.droneMatrix++; }
+  }
+];
+
+function triggerRogueLevelUp() {
+  isRogueSelecting = true;
+  AudioSys.playLevelUp();
+  Haptics.vibrate([60, 40, 80]);
+
+  const shuffled = [...ROGUE_CHIPS].sort(() => 0.5 - Math.random());
+  const selectedCards = shuffled.slice(0, 3);
+
+  const container = document.getElementById('rogue-cards-container');
+  container.innerHTML = '';
+
+  selectedCards.forEach(chip => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'rogue-card';
+    cardEl.innerHTML = `
+      <div class="rogue-card-icon">${chip.icon}</div>
+      <div class="rogue-card-info">
+        <div class="rogue-card-name">
+          <span>${chip.name}</span>
+          <span class="chip-tier">${chip.tier}</span>
+        </div>
+        <div class="rogue-card-desc">${chip.desc}</div>
+      </div>
+    `;
+    cardEl.onclick = () => selectRogueUpgrade(chip);
+    container.appendChild(cardEl);
+  });
+
+  document.getElementById('screen-rogue-select').style.display = 'flex';
+}
+
+function selectRogueUpgrade(chip) {
+  chip.apply();
+  isRogueSelecting = false;
+  document.getElementById('screen-rogue-select').style.display = 'none';
+
+  AudioSys.playCoin();
+  Haptics.vibrate(30);
+  addFloatingText(Game.player.x, Game.player.y - 30, `✦ ${chip.name} INSTALLED!`, '#b026ff');
+  showToast(`⚡ 成功装配芯片：${chip.name}`);
+  updateHUD();
+}
+
+/* ============================================================
+   5. 战斗引擎与渲染初始化
 ============================================================ */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -971,7 +1186,21 @@ const Game = {
   weaponLevel: 1,
   weaponTimer: 0,
   droneAngle: 0,
-  player: { x: 0, y: 0, r: 16, targetX: 0, targetY: 0 },
+  techLevel: 1,
+  techXp: 0,
+  techXpMax: 100,
+  upgrades: {
+    chainLightning: 0,
+    piercing: 0,
+    shieldNova: 0,
+    hyperMagnet: 0,
+    rapidFire: 0,
+    droneMatrix: 0
+  },
+  shieldNovaTimer: 0,
+  shieldNovas: [],
+  lightningRays: [],
+  player: { x: 0, y: 0, r: 18, targetX: 0, targetY: 0 },
   bullets: [],
   enemyBullets: [],
   enemies: [],
@@ -987,18 +1216,28 @@ const Game = {
   spawnTimer: 0
 };
 
-// 星空
-for (let i = 0; i < 45; i++) {
+for (let i = 0; i < 50; i++) {
   Game.stars.push({
     x: Math.random() * 500,
     y: Math.random() * 900,
-    speed: 0.8 + Math.random() * 2,
+    speed: 0.8 + Math.random() * 2.2,
     size: 1 + Math.random() * 2
   });
 }
 
 function addFloatingText(x, y, text, color = '#00f0ff') {
   Game.floatTexts.push({ x, y, text, color, life: 1.0 });
+}
+
+function gainTechXp(amt) {
+  Game.techXp += amt;
+  if (Game.techXp >= Game.techXpMax) {
+    Game.techXp -= Game.techXpMax;
+    Game.techLevel++;
+    Game.techXpMax = Math.floor(Game.techXpMax * 1.45);
+    triggerRogueLevelUp();
+  }
+  updateHUD();
 }
 
 function startGame() {
@@ -1008,6 +1247,7 @@ function startGame() {
 
   Game.running = true;
   isGamePaused = false;
+  isRogueSelecting = false;
   Game.score = 0;
   Game.lootCoins = 0;
   Game.combo = 0;
@@ -1016,7 +1256,21 @@ function startGame() {
   Game.overdrive = false;
   Game.overdriveTimer = 0;
 
-  // 真实 NFT 加成：2 枚核弹 + 130% 护盾 + 僚机护航
+  Game.techLevel = 1;
+  Game.techXp = 0;
+  Game.techXpMax = 100;
+  Game.upgrades = {
+    chainLightning: 0,
+    piercing: 0,
+    shieldNova: 0,
+    hyperMagnet: 0,
+    rapidFire: 0,
+    droneMatrix: 0
+  };
+  Game.shieldNovaTimer = 0;
+  Game.shieldNovas = [];
+  Game.lightningRays = [];
+
   Game.bombs = userHasNFT ? 2 : 1;
   Game.shield = userHasNFT ? 130 : 100;
   Game.weaponLevel = userHasNFT ? 2 : 1;
@@ -1038,13 +1292,14 @@ function startGame() {
   document.getElementById('screen-start').style.display = 'none';
   document.getElementById('screen-gameover').style.display = 'none';
   document.getElementById('screen-pause').style.display = 'none';
+  document.getElementById('screen-rogue-select').style.display = 'none';
   document.getElementById('boss-bar-wrap').style.display = 'none';
   document.getElementById('boss-title-tag').style.display = 'none';
   document.getElementById('tx-feedback-card').style.display = 'none';
   updateHUD();
 
   if (userHasNFT) {
-    showToast('👑 链上认证战机 NFT 特权已激活：双浮游僚机出击！');
+    showToast('👑 链上认证战机 NFT 特权激活：黑金机神出击！');
   }
 }
 
@@ -1056,7 +1311,6 @@ function gameOver() {
   AudioSys.playExplode();
   Haptics.vibrate([150, 80, 200]);
 
-  // 计算段位
   if (Game.score >= 15000) currentRank = 'SSS';
   else if (Game.score >= 10000) currentRank = 'SS';
   else if (Game.score >= 6000) currentRank = 'S';
@@ -1065,9 +1319,10 @@ function gameOver() {
 
   document.getElementById('res-rank-char').innerText = currentRank;
   document.getElementById('res-score').innerText = Game.score;
+  document.getElementById('res-tech-lv').innerText = `LV.${Game.techLevel}`;
   document.getElementById('res-loot').innerText = Game.lootCoins;
   document.getElementById('res-combo').innerText = Game.maxCombo + 'x';
-  document.getElementById('res-nft-status').innerText = userHasNFT ? "已认证 (VIP双僚机)" : "标准机";
+  document.getElementById('res-nft-status').innerText = userHasNFT ? "已认证 (黑金神机)" : "标准机";
   document.getElementById('screen-gameover').style.display = 'flex';
   document.getElementById('boss-bar-wrap').style.display = 'none';
   document.getElementById('boss-title-tag').style.display = 'none';
@@ -1076,16 +1331,20 @@ function gameOver() {
 function updateHUD() {
   document.getElementById('hud-score').innerText = Game.score;
   document.getElementById('hud-loot').innerText = Game.lootCoins;
+  document.getElementById('hud-tech-lv').innerText = `LV.${Game.techLevel}`;
   const s = Math.max(0, Math.floor(Game.shield));
   document.getElementById('hud-shield').innerText = `${s}%`;
   document.getElementById('hud-shield').style.color = s > 35 ? '#00f0ff' : '#ff3366';
   document.getElementById('bomb-count').innerText = Game.bombs;
   document.getElementById('fever-bar-fill').style.width = Game.feverGauge + '%';
+
+  const xpPct = Math.min(100, (Game.techXp / Game.techXpMax) * 100);
+  document.getElementById('xp-bar-fill').style.width = xpPct + '%';
 }
 
 function triggerNuclearBomb(e) {
   if (e) e.stopPropagation();
-  if (!Game.running || isGamePaused || Game.bombs <= 0) return;
+  if (!Game.running || isGamePaused || isRogueSelecting || Game.bombs <= 0) return;
 
   Game.bombs--;
   Game.screenFlash = 1.0;
@@ -1112,45 +1371,335 @@ function triggerNuclearBomb(e) {
   showToast('💥 量子脉冲核爆清屏！');
 }
 
-/* ============================================================
-   P0 核心特性 1：科学触控偏移防遮挡算法 (TOUCH OFFSET)
-============================================================ */
-const TOUCH_OFFSET_Y = 42; // 让战机保持在手指正上方 42 像素，视野完全开阔！
+function triggerShieldNovaPulse() {
+  Game.shieldNovas.push({ x: Game.player.x, y: Game.player.y, r: 10, maxR: 160 });
+  AudioSys.playCoin();
+  Haptics.vibrate(35);
+  for (let i = Game.enemyBullets.length - 1; i >= 0; i--) {
+    let eb = Game.enemyBullets[i];
+    if (Math.hypot(eb.x - Game.player.x, eb.y - Game.player.y) < 140) {
+      createExplosion(eb.x, eb.y, '#00f0ff', 4);
+      Game.enemyBullets.splice(i, 1);
+    }
+  }
+}
+
+const TOUCH_OFFSET_Y = 42;
 let isPointerDown = false;
 
 function setTargetPos(cx, cy, isTouch = false) {
   const rect = canvas.getBoundingClientRect();
   Game.player.targetX = cx - rect.left;
-  // 关键：触摸时加入 Y 轴偏移，鼠标点击时不偏移
   const offsetY = isTouch ? TOUCH_OFFSET_Y : 0;
   Game.player.targetY = (cy - rect.top) - offsetY;
 }
 
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
-  if (isGamePaused) return;
+  if (isGamePaused || isRogueSelecting) return;
   isPointerDown = true;
   if (e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY, true);
 }, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
-  if (isGamePaused) return;
+  if (isGamePaused || isRogueSelecting) return;
   if (isPointerDown && e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY, true);
 }, { passive: false });
 
 window.addEventListener('touchend', () => { isPointerDown = false; });
-canvas.addEventListener('mousedown', (e) => { if (!isGamePaused) { isPointerDown = true; setTargetPos(e.clientX, e.clientY, false); } });
-window.addEventListener('mousemove', (e) => { if (!isGamePaused && isPointerDown) setTargetPos(e.clientX, e.clientY, false); });
+canvas.addEventListener('mousedown', (e) => { if (!isGamePaused && !isRogueSelecting) { isPointerDown = true; setTargetPos(e.clientX, e.clientY, false); } });
+window.addEventListener('mousemove', (e) => { if (!isGamePaused && !isRogueSelecting && isPointerDown) setTargetPos(e.clientX, e.clientY, false); });
 window.addEventListener('mouseup', () => { isPointerDown = false; });
 
 /* ============================================================
-   5. 物理引擎与渲染主循环
+   🎨 次世代高精矢量机甲立绘渲染引擎 (Next-Gen HD Mech Renderer)
+============================================================ */
+
+// 1. 玩家高精战机立绘 (前掠翼 + 复合碳纤维装甲 + 晶体座舱 + 等离子尾焰)
+function drawPlayerShipHD(x, y, now) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  const isGold = userHasNFT;
+  const isFever = Game.overdrive;
+
+  // 1. 动态双发等离子粒子推进器 (Thrusters)
+  const flameLength = 16 + Math.random() * 12 + (isFever ? 10 : 0);
+  const flameColor = isFever ? '#ff007f' : (isGold ? '#ffd700' : '#00f0ff');
+  
+  // 左/右推进火焰
+  [-7, 7].forEach(offset => {
+    const fGrad = ctx.createLinearGradient(offset, 14, offset, 14 + flameLength);
+    fGrad.addColorStop(0, '#ffffff');
+    fGrad.addColorStop(0.3, flameColor);
+    fGrad.addColorStop(1, 'rgba(0, 82, 255, 0)');
+    ctx.fillStyle = fGrad;
+    ctx.beginPath();
+    ctx.moveTo(offset - 4, 14);
+    ctx.lineTo(offset, 14 + flameLength);
+    ctx.lineTo(offset + 4, 14);
+    ctx.closePath();
+    ctx.fill();
+  });
+
+  // 2. 护盾力场外圈
+  if (Game.shield > 40) {
+    ctx.strokeStyle = isFever ? 'rgba(255, 0, 127, 0.6)' : (isGold ? 'rgba(255, 215, 0, 0.6)' : 'rgba(0, 240, 255, 0.4)');
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 28, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 3. 碳纤前掠副翼 / 翼刀 (Outer Wings)
+  ctx.fillStyle = isGold ? '#1a1710' : '#0e1726';
+  ctx.strokeStyle = isFever ? '#ff007f' : (isGold ? '#ffd700' : '#00f0ff');
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = ctx.strokeStyle;
+  ctx.shadowBlur = 8;
+
+  // 左翼
+  ctx.beginPath();
+  ctx.moveTo(-6, -2);
+  ctx.lineTo(-24, 8);
+  ctx.lineTo(-26, 18);
+  ctx.lineTo(-14, 14);
+  ctx.lineTo(-6, 14);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // 右翼
+  ctx.beginPath();
+  ctx.moveTo(6, -2);
+  ctx.lineTo(24, 8);
+  ctx.lineTo(26, 18);
+  ctx.lineTo(14, 14);
+  ctx.lineTo(6, 14);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // 翼尖航行灯
+  ctx.fillStyle = isFever ? '#ff0055' : '#00ff66';
+  ctx.fillRect(-26, 16, 2, 3);
+  ctx.fillRect(24, 16, 2, 3);
+
+  // 4. 中央装甲主舰体 (Main Fuselage)
+  const bodyGrad = ctx.createLinearGradient(0, -26, 0, 16);
+  if (isGold) {
+    bodyGrad.addColorStop(0, '#ffe57f');
+    bodyGrad.addColorStop(0.4, '#b38600');
+    bodyGrad.addColorStop(1, '#2b2100');
+  } else if (isFever) {
+    bodyGrad.addColorStop(0, '#ff66b2');
+    bodyGrad.addColorStop(0.5, '#99004d');
+    bodyGrad.addColorStop(1, '#33001a');
+  } else {
+    bodyGrad.addColorStop(0, '#e6f9ff');
+    bodyGrad.addColorStop(0.3, '#0088cc');
+    bodyGrad.addColorStop(0.8, '#0d223a');
+    bodyGrad.addColorStop(1, '#050c17');
+  }
+
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, -26);     // 机头锐角刺针
+  ctx.lineTo(7, -8);      // 进气道外折
+  ctx.lineTo(12, 6);      // 中段装甲肋骨
+  ctx.lineTo(8, 16);      // 尾部喷口外缘
+  ctx.lineTo(0, 12);      // 尾椎
+  ctx.lineTo(-8, 16);
+  ctx.lineTo(-12, 6);
+  ctx.lineTo(-7, -8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // 5. 晶体全息驾驶座舱罩 (Canopy Cockpit)
+  const canopyGrad = ctx.createLinearGradient(0, -14, 0, 2);
+  canopyGrad.addColorStop(0, '#ffffff');
+  canopyGrad.addColorStop(0.4, isFever ? '#ff007f' : (isGold ? '#ffd700' : '#00f0ff'));
+  canopyGrad.addColorStop(1, 'rgba(0, 82, 255, 0.4)');
+
+  ctx.fillStyle = canopyGrad;
+  ctx.shadowColor = '#00f0ff';
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.moveTo(0, -15);
+  ctx.lineTo(4, -5);
+  ctx.lineTo(3, 2);
+  ctx.lineTo(0, 4);
+  ctx.lineTo(-3, 2);
+  ctx.lineTo(-4, -5);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// 2. 悬浮僚机立绘 (Floating Drone)
+function drawWingmanDroneHD(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // 悬浮能量光晕
+  ctx.fillStyle = 'rgba(0, 255, 170, 0.2)';
+  ctx.beginPath();
+  ctx.arc(0, 0, 14, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 僚机复合装甲主体
+  ctx.fillStyle = '#0a1a1f';
+  ctx.strokeStyle = '#00ffaa';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#00ffaa';
+  ctx.shadowBlur = 8;
+
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.lineTo(8, 2);
+  ctx.lineTo(5, 9);
+  ctx.lineTo(0, 6);
+  ctx.lineTo(-5, 9);
+  ctx.lineTo(-8, 2);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // 僚机核心激光聚焦球
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(0, 0, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// 3. 敌机高精立绘 (普通掠食者 & 精英突击机)
+function drawEnemyHD(e) {
+  ctx.save();
+  ctx.translate(e.x, e.y);
+
+  if (e.isElite) {
+    // 精英装甲拦截机 (重装甲红金色调)
+    const eGrad = ctx.createLinearGradient(0, -18, 0, 18);
+    eGrad.addColorStop(0, '#ff3366');
+    eGrad.addColorStop(0.5, '#66001a');
+    eGrad.addColorStop(1, '#2b000a');
+    ctx.fillStyle = eGrad;
+    ctx.strokeStyle = '#ff0055';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#ff0055';
+    ctx.shadowBlur = 10;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 18);      // 冲角机尖向下
+    ctx.lineTo(16, 4);
+    ctx.lineTo(20, -12);
+    ctx.lineTo(10, -16);
+    ctx.lineTo(4, -8);
+    ctx.lineTo(-4, -8);
+    ctx.lineTo(-10, -16);
+    ctx.lineTo(-20, -12);
+    ctx.lineTo(-16, 4);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // 暗能核心眼
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(0, 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // 普通轻型侦察机 (利刃型)
+    const nGrad = ctx.createLinearGradient(0, -12, 0, 14);
+    nGrad.addColorStop(0, '#ffaa00');
+    nGrad.addColorStop(1, '#4d1a00');
+    ctx.fillStyle = nGrad;
+    ctx.strokeStyle = '#ffaa00';
+    ctx.lineWidth = 1.2;
+    ctx.shadowColor = '#ffaa00';
+    ctx.shadowBlur = 6;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 14);
+    ctx.lineTo(12, -6);
+    ctx.lineTo(5, -12);
+    ctx.lineTo(0, -4);
+    ctx.lineTo(-5, -12);
+    ctx.lineTo(-12, -6);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // 引擎核心
+    ctx.fillStyle = '#ff0055';
+    ctx.fillRect(-2, -8, 4, 3);
+  }
+
+  ctx.restore();
+}
+
+// 4. 暗能母舰 Boss 高精立绘 (多舱段 + 反应堆核心脉动)
+function drawBossHD(b, now) {
+  ctx.save();
+  ctx.translate(b.x, b.y);
+
+  const isEnraged = b.phase2;
+  const pulse = Math.sin(now * 0.008) * 4;
+
+  // 左右巨型装甲机翼 (Heavy Wings)
+  const wingGrad = ctx.createLinearGradient(0, -40, 0, 45);
+  wingGrad.addColorStop(0, isEnraged ? '#4a0815' : '#1e112a');
+  wingGrad.addColorStop(1, isEnraged ? '#1a0006' : '#08040d');
+  ctx.fillStyle = wingGrad;
+  ctx.strokeStyle = isEnraged ? '#ffaa00' : '#ff0055';
+  ctx.lineWidth = 3;
+  ctx.shadowColor = ctx.strokeStyle;
+  ctx.shadowBlur = 15;
+
+  ctx.beginPath();
+  ctx.moveTo(0, 48);          // 舰尖巨角
+  ctx.lineTo(35, 18);
+  ctx.lineTo(72, -8);
+  ctx.lineTo(65, -38);
+  ctx.lineTo(40, -25);
+  ctx.lineTo(18, -42);
+  ctx.lineTo(0, -32);
+  ctx.lineTo(-18, -42);
+  ctx.lineTo(-40, -25);
+  ctx.lineTo(-65, -38);
+  ctx.lineTo(-72, -8);
+  ctx.lineTo(-35, 18);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // 左右副炮塔基座
+  ctx.fillStyle = '#ff0055';
+  [-45, 45].forEach(ox => {
+    ctx.beginPath();
+    ctx.arc(ox, -10, 6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 暗物质反应堆中央巨眼 (Dark Matter Core)
+  const coreGrad = ctx.createRadialGradient(0, 4, 2, 0, 4, 18 + pulse);
+  coreGrad.addColorStop(0, '#ffffff');
+  coreGrad.addColorStop(0.3, isEnraged ? '#ff0000' : '#ffd700');
+  coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = coreGrad;
+  ctx.beginPath();
+  ctx.arc(0, 4, 18 + pulse, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* ============================================================
+   6. 物理引擎与渲染主循环
 ============================================================ */
 function loop(now) {
   requestAnimationFrame(loop);
 
-  if (isGamePaused) return;
+  if (isGamePaused || isRogueSelecting) return;
 
   ctx.save();
   if (Game.shake > 0) {
@@ -1161,12 +1710,12 @@ function loop(now) {
     if (Game.shake < 0.5) Game.shake = 0;
   }
 
-  // 背景
-  ctx.fillStyle = Game.overdrive ? '#130026' : '#060912';
+  // 宇宙深空背景
+  ctx.fillStyle = Game.overdrive ? '#110222' : '#05070c';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 星空
-  ctx.fillStyle = Game.overdrive ? '#00f0ff' : 'rgba(255, 255, 255, 0.6)';
+  // 星空流星粒子
+  ctx.fillStyle = Game.overdrive ? '#00f0ff' : 'rgba(255, 255, 255, 0.65)';
   for (let s of Game.stars) {
     s.y += (Game.overdrive ? s.speed * 3.5 : s.speed);
     if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
@@ -1186,65 +1735,81 @@ function loop(now) {
     }
   }
 
-  // 战机平滑跟随（并进行屏幕边界限制）
+  // 周期冲击波
+  if (Game.upgrades.shieldNova > 0) {
+    Game.shieldNovaTimer++;
+    if (Game.shieldNovaTimer >= 360) {
+      triggerShieldNovaPulse();
+      Game.shieldNovaTimer = 0;
+    }
+  }
+
+  // 平滑物理移动
   Game.player.x += (Game.player.targetX - Game.player.x) * 0.28;
   Game.player.y += (Game.player.targetY - Game.player.y) * 0.28;
-  Game.player.x = Math.max(18, Math.min(canvas.width - 18, Game.player.x));
+  Game.player.x = Math.max(22, Math.min(canvas.width - 22, Game.player.x));
   Game.player.y = Math.max(30, Math.min(canvas.height - 35, Game.player.y));
 
-  // 浮游僚机角度
   Game.droneAngle += 0.05;
 
-  // 连击自然衰减
   if (Game.combo > 0) {
     Game.comboTimer--;
     if (Game.comboTimer <= 0) Game.combo = 0;
   }
 
-  // 武器升级衰减
   if (Game.weaponTimer > 0) {
     Game.weaponTimer--;
     if (Game.weaponTimer <= 0 && !userHasNFT) Game.weaponLevel = 1;
   }
 
-  // 自动极速射击
-  const shootCooldown = Game.overdrive ? 65 : (Game.weaponLevel > 1 ? 110 : 145);
+  // 极速射击频率计算
+  const rapidBonus = Game.upgrades.rapidFire * 25;
+  let shootCooldown = Game.overdrive ? 60 : (Game.weaponLevel > 1 ? 105 : 140);
+  shootCooldown = Math.max(45, shootCooldown - rapidBonus);
+
+  const hasDrones = userHasNFT || Game.upgrades.droneMatrix > 0;
+
   if (now - Game.lastShot > shootCooldown) {
-    // 主炮
+    const pierceCount = Game.upgrades.piercing;
+
     if (Game.overdrive) {
       for (let k = -2; k <= 2; k++) {
-        Game.bullets.push({ x: Game.player.x + k * 8, y: Game.player.y - 15, vx: k * 2.2, vy: -14, isFever: true });
+        Game.bullets.push({ x: Game.player.x + k * 8, y: Game.player.y - 18, vx: k * 2.2, vy: -14, isFever: true, pierce: pierceCount + 1 });
       }
-    } else if (userHasNFT || Game.weaponLevel > 1) {
-      Game.bullets.push({ x: Game.player.x - 12, y: Game.player.y - 12, vx: -2, vy: -12 });
-      Game.bullets.push({ x: Game.player.x - 4, y: Game.player.y - 15, vx: 0, vy: -13 });
-      Game.bullets.push({ x: Game.player.x + 4, y: Game.player.y - 15, vx: 0, vy: -13 });
-      Game.bullets.push({ x: Game.player.x + 12, y: Game.player.y - 12, vx: 2, vy: -12 });
+    } else if (hasDrones || Game.weaponLevel > 1) {
+      Game.bullets.push({ x: Game.player.x - 14, y: Game.player.y - 14, vx: -2, vy: -12, pierce: pierceCount });
+      Game.bullets.push({ x: Game.player.x - 5, y: Game.player.y - 18, vx: 0, vy: -13, pierce: pierceCount });
+      Game.bullets.push({ x: Game.player.x + 5, y: Game.player.y - 18, vx: 0, vy: -13, pierce: pierceCount });
+      Game.bullets.push({ x: Game.player.x + 14, y: Game.player.y - 14, vx: 2, vy: -12, pierce: pierceCount });
     } else {
-      Game.bullets.push({ x: Game.player.x - 8, y: Game.player.y - 14, vx: 0, vy: -12 });
-      Game.bullets.push({ x: Game.player.x + 8, y: Game.player.y - 14, vx: 0, vy: -12 });
+      Game.bullets.push({ x: Game.player.x - 8, y: Game.player.y - 18, vx: 0, vy: -12, pierce: pierceCount });
+      Game.bullets.push({ x: Game.player.x + 8, y: Game.player.y - 18, vx: 0, vy: -12, pierce: pierceCount });
     }
 
-    // 智能僚机副炮
-    if (userHasNFT || Game.weaponLevel > 1) {
-      const d1x = Game.player.x - 28, d1y = Game.player.y + 6;
-      const d2x = Game.player.x + 28, d2y = Game.player.y + 6;
-      Game.bullets.push({ x: d1x, y: d1y - 8, vx: -0.8, vy: -15, isDrone: true });
-      Game.bullets.push({ x: d2x, y: d2y - 8, vx: 0.8, vy: -15, isDrone: true });
+    if (hasDrones) {
+      const d1x = Game.player.x - 30, d1y = Game.player.y + 4;
+      const d2x = Game.player.x + 30, d2y = Game.player.y + 4;
+      const droneSpread = Game.upgrades.droneMatrix > 1;
+      Game.bullets.push({ x: d1x, y: d1y - 8, vx: droneSpread ? -1.8 : -0.8, vy: -15, isDrone: true, pierce: pierceCount });
+      Game.bullets.push({ x: d2x, y: d2y - 8, vx: droneSpread ? 1.8 : 0.8, vy: -15, isDrone: true, pierce: pierceCount });
+      if (droneSpread) {
+        Game.bullets.push({ x: d1x, y: d1y - 8, vx: 0, vy: -15, isDrone: true, pierce: pierceCount });
+        Game.bullets.push({ x: d2x, y: d2y - 8, vx: 0, vy: -15, isDrone: true, pierce: pierceCount });
+      }
     }
 
     AudioSys.playLaser();
     Game.lastShot = now;
   }
 
-  // Boss 生成逻辑
+  // Boss 生成
   if (Game.score >= 5000 && !Game.boss && !Game.bossSpawned) {
     Game.bossSpawned = true;
     Game.boss = {
       x: canvas.width / 2,
       y: -70,
       targetY: 85,
-      r: 40,
+      r: 45,
       hp: 1400,
       maxHp: 1400,
       phase2: false,
@@ -1258,7 +1823,7 @@ function loop(now) {
 
   // 普通敌机生成
   Game.spawnTimer++;
-  if (Game.spawnTimer % (Game.overdrive ? 20 : 35) === 0 && (!Game.boss || Math.random() < 0.45)) {
+  if (Game.spawnTimer % (Game.overdrive ? 18 : 32) === 0 && (!Game.boss || Math.random() < 0.45)) {
     const isElite = Math.random() < 0.28;
     Game.enemies.push({
       x: 25 + Math.random() * (canvas.width - 50),
@@ -1271,13 +1836,13 @@ function loop(now) {
     });
   }
 
-  // 玩家子弹更新
+  // 玩家子弹
   for (let i = Game.bullets.length - 1; i >= 0; i--) {
     let b = Game.bullets[i];
     b.x += (b.vx || 0);
     b.y += b.vy;
 
-    ctx.fillStyle = b.isFever ? '#ff007f' : (b.isDrone ? '#00ffaa' : (userHasNFT ? '#ffd700' : '#00f0ff'));
+    ctx.fillStyle = b.isFever ? '#ff007f' : (b.isDrone ? '#00ffaa' : (Game.upgrades.piercing > 0 ? '#b026ff' : (userHasNFT ? '#ffd700' : '#00f0ff')));
     ctx.shadowColor = ctx.fillStyle;
     ctx.shadowBlur = 8;
     ctx.fillRect(b.x - 2, b.y - 6, 4, 12);
@@ -1301,26 +1866,7 @@ function loop(now) {
       document.getElementById('boss-title-tag').style.color = '#ffaa00';
     }
 
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.fillStyle = b.phase2 ? '#660022' : '#330b22';
-    ctx.strokeStyle = b.phase2 ? '#ffaa00' : '#ff0055';
-    ctx.lineWidth = b.phase2 ? 4 : 3;
-    ctx.beginPath();
-    ctx.moveTo(0, 44);
-    ctx.lineTo(60, -15);
-    ctx.lineTo(45, -35);
-    ctx.lineTo(0, -25);
-    ctx.lineTo(-45, -35);
-    ctx.lineTo(-60, -15);
-    ctx.closePath();
-    ctx.fill(); ctx.stroke();
-
-    ctx.fillStyle = b.phase2 ? '#ff0000' : '#ffd700';
-    ctx.beginPath();
-    ctx.arc(0, 5, b.phase2 ? 18 : 14, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    drawBossHD(b, now);
 
     b.shootTimer++;
     if (!b.phase2 && b.shootTimer % 38 === 0) {
@@ -1351,14 +1897,19 @@ function loop(now) {
     for (let j = Game.bullets.length - 1; j >= 0; j--) {
       let pb = Game.bullets[j];
       if (Math.hypot(b.x - pb.x, b.y - pb.y) < b.r + 5) {
-        Game.bullets.splice(j, 1);
+        if (!pb.pierce || pb.pierce <= 0) Game.bullets.splice(j, 1);
+        else pb.pierce--;
+
         const dmg = Game.overdrive ? 36 : (pb.isDrone ? 16 : 22);
         b.hp -= dmg;
         createExplosion(pb.x, pb.y, '#ffd700', 3);
+        gainTechXp(6);
+
         if (b.hp <= 0) {
           createExplosion(b.x, b.y, '#ffd700', 50);
           AudioSys.playBomb();
           Game.score += 6000;
+          gainTechXp(150);
           addFloatingText(b.x, b.y, '+6000 BOSS ANNIHILATED!', '#ffd700');
           for (let m = 0; m < 12; m++) {
             Game.drops.push({ x: b.x + (Math.random()-0.5)*60, y: b.y + (Math.random()-0.5)*50, type: 'token_coin' });
@@ -1380,46 +1931,42 @@ function loop(now) {
     }
   }
 
-  // 普通敌机
+  // 敌机行为
   for (let i = Game.enemies.length - 1; i >= 0; i--) {
     let e = Game.enemies[i];
     e.y += e.speed;
 
-    ctx.save();
-    ctx.translate(e.x, e.y);
-    ctx.fillStyle = e.color;
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1;
-
-    if (e.isElite) {
-      ctx.beginPath();
-      ctx.moveTo(0, 16);
-      ctx.lineTo(16, -6);
-      ctx.lineTo(10, -16);
-      ctx.lineTo(-10, -16);
-      ctx.lineTo(-16, -6);
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
-    } else {
-      ctx.beginPath();
-      ctx.moveTo(0, 14);
-      ctx.lineTo(12, -10);
-      ctx.lineTo(0, -6);
-      ctx.lineTo(-12, -10);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
+    drawEnemyHD(e);
 
     for (let j = Game.bullets.length - 1; j >= 0; j--) {
       let b = Game.bullets[j];
       if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + 5) {
-        Game.bullets.splice(j, 1);
+        if (!b.pierce || b.pierce <= 0) Game.bullets.splice(j, 1);
+        else b.pierce--;
+
         e.hp -= (Game.overdrive ? 2 : 1);
+
+        if (Game.upgrades.chainLightning > 0 && Game.enemies.length > 1) {
+          let nearest = null, minDist = 140;
+          for (let other of Game.enemies) {
+            if (other !== e) {
+              const d = Math.hypot(other.x - e.x, other.y - e.y);
+              if (d < minDist) { minDist = d; nearest = other; }
+            }
+          }
+          if (nearest) {
+            nearest.hp -= Game.upgrades.chainLightning * 1.5;
+            Game.lightningRays.push({ x1: e.x, y1: e.y, x2: nearest.x, y2: nearest.y, life: 1.0 });
+            createExplosion(nearest.x, nearest.y, '#00f0ff', 4);
+          }
+        }
+
         if (e.hp <= 0) {
           createExplosion(e.x, e.y, e.color, 10);
           AudioSys.playExplode();
           Haptics.vibrate(18);
+
+          gainTechXp(e.isElite ? 45 : 15);
 
           Game.combo++;
           Game.comboTimer = 90;
@@ -1472,6 +2019,7 @@ function loop(now) {
         createExplosion(e.x, e.y, '#ff0055', 12);
         Game.enemies.splice(i, 1);
         addFloatingText(Game.player.x, Game.player.y - 15, '-30 SHIELD', '#ff0055');
+        if (Game.upgrades.shieldNova > 0) triggerShieldNovaPulse();
         updateHUD();
         if (Game.shield <= 0) { gameOver(); ctx.restore(); return; }
       }
@@ -1497,6 +2045,7 @@ function loop(now) {
         Haptics.vibrate(40);
         Game.enemyBullets.splice(i, 1);
         addFloatingText(Game.player.x, Game.player.y - 15, '-15', '#ff0055');
+        if (Game.upgrades.shieldNova > 0) triggerShieldNovaPulse();
         updateHUD();
         if (Game.shield <= 0) { gameOver(); ctx.restore(); return; }
         continue;
@@ -1510,14 +2059,16 @@ function loop(now) {
     }
   }
 
-  // 掉落物 (量子磁暴吸附算法)
+  // 磁暴吸附掉落物
+  const baseMagnetRange = 90 + (Game.upgrades.hyperMagnet * 80);
+  const baseMagnetSpeed = (Game.overdrive ? 8.5 : 5.0) + (Game.upgrades.hyperMagnet * 2.5);
+
   for (let i = Game.drops.length - 1; i >= 0; i--) {
     let d = Game.drops[i];
     const distToPlayer = Math.hypot(Game.player.x - d.x, Game.player.y - d.y);
-    if (Game.overdrive || distToPlayer < 90) {
-      const magnetSpeed = Game.overdrive ? 8.5 : 5.0;
-      d.x += ((Game.player.x - d.x) / distToPlayer) * magnetSpeed;
-      d.y += ((Game.player.y - d.y) / distToPlayer) * magnetSpeed;
+    if (Game.overdrive || distToPlayer < baseMagnetRange) {
+      d.x += ((Game.player.x - d.x) / distToPlayer) * baseMagnetSpeed;
+      d.y += ((Game.player.y - d.y) / distToPlayer) * baseMagnetSpeed;
     } else {
       d.y += 1.8;
     }
@@ -1557,6 +2108,7 @@ function loop(now) {
         const amt = Game.overdrive ? 20 : 10;
         Game.lootCoins += amt;
         Game.score += 250;
+        gainTechXp(20);
         AudioSys.playCoin();
         addFloatingText(d.x, d.y, `+${amt} $TOKEN`, '#ffd700');
       } else if (d.type === 'power') {
@@ -1580,6 +2132,42 @@ function loop(now) {
     }
   }
 
+  // 闪电电弧渲染
+  for (let i = Game.lightningRays.length - 1; i >= 0; i--) {
+    let r = Game.lightningRays[i];
+    ctx.save();
+    ctx.strokeStyle = `rgba(0, 240, 255, ${r.life})`;
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(r.x1, r.y1);
+    const midX = (r.x1 + r.x2) / 2 + (Math.random() - 0.5) * 16;
+    const midY = (r.y1 + r.y2) / 2 + (Math.random() - 0.5) * 16;
+    ctx.lineTo(midX, midY);
+    ctx.lineTo(r.x2, r.y2);
+    ctx.stroke();
+    ctx.restore();
+    r.life -= 0.12;
+    if (r.life <= 0) Game.lightningRays.splice(i, 1);
+  }
+
+  // 量子冲击波环渲染
+  for (let i = Game.shieldNovas.length - 1; i >= 0; i--) {
+    let n = Game.shieldNovas[i];
+    ctx.save();
+    ctx.strokeStyle = `rgba(0, 240, 255, ${1.0 - n.r / n.maxR})`;
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+    n.r += 6;
+    if (n.r >= n.maxR) Game.shieldNovas.splice(i, 1);
+  }
+
   // 粒子
   for (let i = Game.particles.length - 1; i >= 0; i--) {
     let p = Game.particles[i];
@@ -1592,7 +2180,7 @@ function loop(now) {
     if (p.life <= 0) Game.particles.splice(i, 1);
   }
 
-  // 浮动战损飘字
+  // 浮动战损字
   for (let i = Game.floatTexts.length - 1; i >= 0; i--) {
     let ft = Game.floatTexts[i];
     ft.y -= 1.1;
@@ -1616,61 +2204,13 @@ function loop(now) {
   }
 
   // 绘制僚机
-  if (userHasNFT || Game.weaponLevel > 1) {
-    drawWingmanDrone(Game.player.x - 28, Game.player.y + 6);
-    drawWingmanDrone(Game.player.x + 28, Game.player.y + 6);
+  if (hasDrones) {
+    drawWingmanDroneHD(Game.player.x - 30, Game.player.y + 4);
+    drawWingmanDroneHD(Game.player.x + 30, Game.player.y + 4);
   }
 
-  // 绘制玩家战机
-  drawPlayerShip(Game.player.x, Game.player.y);
-
-  ctx.restore();
-}
-
-function drawWingmanDrone(x, y) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = '#00ffaa';
-  ctx.shadowColor = '#00ffaa';
-  ctx.shadowBlur = 8;
-  ctx.beginPath();
-  ctx.moveTo(0, -8);
-  ctx.lineTo(6, 6);
-  ctx.lineTo(-6, 6);
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawPlayerShip(x, y) {
-  ctx.save();
-  ctx.translate(x, y);
-
-  if (Game.shield > 40) {
-    ctx.strokeStyle = Game.overdrive ? '#ff007f' : (userHasNFT ? '#ffd700' : 'rgba(0, 240, 255, 0.45)');
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(0, 0, 24, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = Game.overdrive ? '#00f0ff' : (userHasNFT ? '#ffd700' : '#ff0055');
-  ctx.beginPath();
-  ctx.moveTo(-5, 12);
-  ctx.lineTo(0, 20 + Math.random() * 9);
-  ctx.lineTo(5, 12);
-  ctx.fill();
-
-  ctx.fillStyle = Game.overdrive ? '#ff007f' : (userHasNFT ? '#ffd700' : '#00f0ff');
-  ctx.shadowColor = ctx.fillStyle;
-  ctx.shadowBlur = 12;
-  ctx.beginPath();
-  ctx.moveTo(0, -18);
-  ctx.lineTo(16, 12);
-  ctx.lineTo(0, 6);
-  ctx.lineTo(-16, 12);
-  ctx.closePath();
-  ctx.fill();
+  // 绘制玩家高精机甲
+  drawPlayerShipHD(Game.player.x, Game.player.y, now);
 
   ctx.restore();
 }
@@ -1691,7 +2231,7 @@ function createExplosion(x, y, color, count = 12) {
 }
 
 /* ============================================================
-   P0 核心特性 2：赛博战报海报独立渲染引擎 (Canvas Poster Generator)
+   7. 赛博战报海报生成器 (Canvas Poster Generator)
 ============================================================ */
 function generateBattlePoster() {
   const pCanvas = document.createElement('canvas');
@@ -1699,7 +2239,6 @@ function generateBattlePoster() {
   pCanvas.height = 960;
   const pCtx = pCanvas.getContext('2d');
 
-  // 1. 深邃赛博网格背景
   const grad = pCtx.createLinearGradient(0, 0, 0, 960);
   grad.addColorStop(0, '#090d1a');
   grad.addColorStop(0.5, '#04060b');
@@ -1707,7 +2246,6 @@ function generateBattlePoster() {
   pCtx.fillStyle = grad;
   pCtx.fillRect(0, 0, 640, 960);
 
-  // 科技网格线
   pCtx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
   pCtx.lineWidth = 1;
   for (let x = 0; x < 640; x += 40) {
@@ -1717,23 +2255,20 @@ function generateBattlePoster() {
     pCtx.beginPath(); pCtx.moveTo(0, y); pCtx.lineTo(640, y); pCtx.stroke();
   }
 
-  // 霓虹装饰外框
   pCtx.strokeStyle = '#00f0ff';
   pCtx.lineWidth = 4;
   pCtx.strokeRect(20, 20, 600, 920);
 
-  pCtx.strokeStyle = '#ff007f';
+  pCtx.strokeStyle = '#b026ff';
   pCtx.lineWidth = 1.5;
   pCtx.strokeRect(26, 26, 588, 908);
 
-  // 四角科技切角装饰
   pCtx.fillStyle = '#00f0ff';
   pCtx.fillRect(16, 16, 12, 12);
   pCtx.fillRect(612, 16, 12, 12);
   pCtx.fillRect(16, 932, 12, 12);
   pCtx.fillRect(612, 932, 12, 12);
 
-  // 顶部 Badge
   pCtx.fillStyle = '#0052ff';
   pCtx.beginPath();
   pCtx.roundRect(40, 48, 140, 28, 6);
@@ -1743,7 +2278,6 @@ function generateBattlePoster() {
   pCtx.textAlign = 'center';
   pCtx.fillText('BASE MAINNET', 110, 67);
 
-  // 游戏标题
   pCtx.textAlign = 'left';
   pCtx.font = '900 32px sans-serif';
   pCtx.fillStyle = '#ffffff';
@@ -1753,14 +2287,12 @@ function generateBattlePoster() {
   pCtx.shadowBlur = 0;
 
   pCtx.font = '12px monospace';
-  pCtx.fillStyle = '#00f0ff';
+  pCtx.fillStyle = '#b026ff';
   pCtx.fillText('ON-CHAIN COMBAT ARCHIVE // 战绩核定公报', 40, 148);
 
-  // 分隔线
   pCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
   pCtx.beginPath(); pCtx.moveTo(40, 168); pCtx.lineTo(600, 168); pCtx.stroke();
 
-  // 飞行员地址卡
   const pilotName = userAccount 
     ? (userAccount.slice(0, 6) + '...' + userAccount.slice(-4)) 
     : 'GUEST PILOT';
@@ -1772,13 +2304,11 @@ function generateBattlePoster() {
   pCtx.fillStyle = '#ffd700';
   pCtx.fillText(pilotName, 145, 211);
 
-  // 中央段位巨幅勋章
   pCtx.save();
   pCtx.translate(320, 360);
 
-  // 勋章光环
   const ringGrad = pCtx.createRadialGradient(0, 0, 40, 0, 0, 110);
-  ringGrad.addColorStop(0, 'rgba(255, 215, 0, 0.25)');
+  ringGrad.addColorStop(0, 'rgba(176, 38, 255, 0.25)');
   ringGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
   pCtx.fillStyle = ringGrad;
   pCtx.beginPath(); pCtx.arc(0, 0, 110, 0, Math.PI * 2); pCtx.fill();
@@ -1790,7 +2320,6 @@ function generateBattlePoster() {
   pCtx.beginPath(); pCtx.arc(0, 0, 85, 0, Math.PI * 2); pCtx.stroke();
   pCtx.shadowBlur = 0;
 
-  // 段位文字
   pCtx.textAlign = 'center';
   pCtx.textBaseline = 'middle';
   pCtx.font = '900 78px monospace';
@@ -1805,11 +2334,10 @@ function generateBattlePoster() {
   pCtx.fillText('COMBAT RATING', 0, 52);
   pCtx.restore();
 
-  // 战绩数据方阵
   const stats = [
     { label: 'FINAL SCORE', val: Game.score.toLocaleString(), color: '#00f0ff' },
+    { label: 'TECH LEVEL', val: `LV.${Game.techLevel} MATRIX`, color: '#b026ff' },
     { label: 'LOOT TOKENS', val: `+${Game.lootCoins} $TOKEN`, color: '#ffd700' },
-    { label: 'MAX COMBO', val: `${Game.maxCombo}x STREAK`, color: '#ff007f' },
     { label: 'NFT FIGHTER', val: userHasNFT ? 'VERIFIED VIP' : 'STANDARD', color: '#00ff66' }
   ];
 
@@ -1834,20 +2362,6 @@ function generateBattlePoster() {
     pCtx.fillText(s.val, bx + 16, by + 56);
   });
 
-  // 战机机身像素图腾（绘制在海报右下方或中央做水印）
-  pCtx.save();
-  pCtx.translate(320, 740);
-  pCtx.fillStyle = '#00f0ff';
-  pCtx.beginPath();
-  pCtx.moveTo(0, -30);
-  pCtx.lineTo(26, 20);
-  pCtx.lineTo(0, 10);
-  pCtx.lineTo(-26, 20);
-  pCtx.closePath();
-  pCtx.fill();
-  pCtx.restore();
-
-  // 底部网址与链上印章
   pCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
   pCtx.beginPath(); pCtx.moveTo(40, 810); pCtx.lineTo(600, 810); pCtx.stroke();
 
