@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Pulse Pioneer: Base 脉冲先锋 V5</title>
+  <title>Pulse Pioneer: Base 脉冲先锋 V6</title>
   <style>
     :root {
       --base-blue: #0052ff;
@@ -258,9 +258,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 18px;
+      padding: 16px;
       text-align: center;
       z-index: 25;
+      overflow-y: auto;
     }
     .title-glitch {
       font-size: 26px;
@@ -273,7 +274,7 @@
     .subtitle {
       font-size: 11px;
       color: #8da2c4;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       letter-spacing: 1px;
     }
     .card-box {
@@ -281,8 +282,8 @@
       background: rgba(18, 24, 38, 0.9);
       border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
       text-align: left;
       font-size: 12px;
       line-height: 1.5;
@@ -290,7 +291,7 @@
     .stat-row {
       display: flex;
       justify-content: space-between;
-      margin: 4px 0;
+      margin: 3px 0;
       color: #a8b8d0;
     }
     .stat-val {
@@ -306,7 +307,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .rank-emblem {
       font-size: 38px;
@@ -318,7 +319,7 @@
 
     .btn-action {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       border-radius: 9px;
       border: none;
       font-size: 13px;
@@ -335,6 +336,12 @@
       background: linear-gradient(135deg, var(--neon-cyan), var(--base-blue));
       color: #050a14;
       box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    }
+    .btn-share {
+      background: linear-gradient(135deg, #00f0ff, #0052ff);
+      color: #050a14;
+      font-weight: 900;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.4);
     }
     .btn-token {
       background: linear-gradient(135deg, #ffd700, #ff8800);
@@ -361,7 +368,7 @@
       border: 1px solid var(--neon-cyan);
       border-radius: 8px;
       padding: 8px;
-      margin-top: 8px;
+      margin-top: 6px;
       font-size: 11px;
       text-align: center;
     }
@@ -372,7 +379,41 @@
       word-break: break-all;
     }
 
-    /* 弹窗通用 */
+    /* 战果海报弹窗 */
+    #poster-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #poster-img-container {
+      max-width: 320px;
+      width: 85%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      margin-bottom: 12px;
+    }
+    #poster-preview-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .poster-tips {
+      font-size: 12px;
+      color: var(--neon-cyan);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    /* 合约列表弹窗 */
     .modal-box {
       position: absolute;
       inset: 14px;
@@ -490,13 +531,13 @@
 
   <!-- 初始界面 -->
   <div class="overlay" id="screen-start">
-    <div class="title-glitch">PULSE PIONEER V</div>
-    <div class="subtitle">BASE MAINNET // 智能合约硬核全打通</div>
+    <div class="title-glitch">PULSE PIONEER VI</div>
+    <div class="subtitle">BASE MAINNET // 链上极速脉冲空战</div>
     
     <div class="card-box">
-      <div style="color:var(--neon-cyan); font-weight:bold; margin-bottom:5px;">⛓️ 当前链上配置已就绪：</div>
+      <div style="color:var(--neon-cyan); font-weight:bold; margin-bottom:5px;">⛓️ 当前链上状态就绪：</div>
       <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>代币合约</b>：<code>0x0625...8aB6</code> (读取真余额)</p>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>战机 NFT</b>：<code>0xcBa0...b776</code> (持有人解锁双护卫僚机)</p>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:4px;">• <b>战机 NFT</b>：<code>0xcBa0...b776</code> (持有人激活双僚机)</p>
       <p style="color:#94a3b8; font-size:11px;">• <b>战绩存证</b>：<code>0xE402...739b</code> (真实链上记分)</p>
     </div>
 
@@ -525,7 +566,12 @@
       <div class="stat-row"><span>战机 NFT 认证</span><span class="stat-val" id="res-nft-status" style="color:var(--neon-cyan)">未持有</span></div>
     </div>
 
-    <!-- 真实交易哈希直达卡片 -->
+    <!-- P0 杀手锏：一键生成战报海报分享 -->
+    <button class="btn-action btn-share" onclick="showBattlePosterModal()">
+      <span>📸</span> 生成赛博战报海报 (分享朋友圈/X)
+    </button>
+
+    <!-- BaseScan 交易反馈卡 -->
     <div id="tx-feedback-card">
       <div>⛓️ 链上交易已广播！</div>
       <a id="tx-basescan-link" href="#" target="_blank">点击在 BaseScan 上验证这笔真实交易 ↗</a>
@@ -549,6 +595,22 @@
     <button class="btn-action btn-primary" style="max-width:220px;" onclick="togglePauseGame()">
       <span>▶️</span> 继续战斗 (RESUME)
     </button>
+  </div>
+
+  <!-- P0 海报弹窗 -->
+  <div id="poster-modal">
+    <div id="poster-img-container">
+      <img id="poster-preview-img" alt="战报海报" />
+    </div>
+    <div class="poster-tips">📱 提示：长按上方图片可直接保存到相册分享！</div>
+    <div style="display: flex; gap: 8px; width: 100%; max-width: 320px;">
+      <button class="btn-action btn-primary" style="flex:1;" onclick="downloadPosterImage()">
+        <span>💾</span> 保存图片
+      </button>
+      <button class="btn-action btn-secondary" style="flex:1;" onclick="closeModal('poster-modal')">
+        <span>✕</span> 关闭
+      </button>
+    </div>
   </div>
 
   <!-- 合约列表弹窗 -->
@@ -595,6 +657,8 @@ let userEthBalance = '0.000';
 let userTokenBalance = 0;
 let userHasNFT = false;
 let isGamePaused = false;
+let currentRank = 'B';
+let currentPosterDataUrl = '';
 
 /* ============================================================
    2. Web Audio 合成器 + 赛博 BGM
@@ -879,7 +943,7 @@ function openContractsModal() { document.getElementById('contracts-modal').style
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
 /* ============================================================
-   4. 战斗物理引擎 (量子吸金 + 双僚机 + Boss 2阶段)
+   4. 战斗物理引擎 (含 P0 防遮挡悬浮算法)
 ============================================================ */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -906,7 +970,7 @@ const Game = {
   overdriveTimer: 0,
   weaponLevel: 1,
   weaponTimer: 0,
-  droneAngle: 0, // 僚机浮游角
+  droneAngle: 0,
   player: { x: 0, y: 0, r: 16, targetX: 0, targetY: 0 },
   bullets: [],
   enemyBullets: [],
@@ -967,7 +1031,7 @@ function startGame() {
   Game.bossSpawned = false;
 
   Game.player.x = canvas.width / 2;
-  Game.player.y = canvas.height - 90;
+  Game.player.y = canvas.height - 110;
   Game.player.targetX = Game.player.x;
   Game.player.targetY = Game.player.y;
 
@@ -992,15 +1056,14 @@ function gameOver() {
   AudioSys.playExplode();
   Haptics.vibrate([150, 80, 200]);
 
-  // 计算评级
-  let rank = 'C';
-  if (Game.score >= 15000) rank = 'SSS';
-  else if (Game.score >= 10000) rank = 'SS';
-  else if (Game.score >= 6000) rank = 'S';
-  else if (Game.score >= 3000) rank = 'A';
-  else if (Game.score >= 1500) rank = 'B';
+  // 计算段位
+  if (Game.score >= 15000) currentRank = 'SSS';
+  else if (Game.score >= 10000) currentRank = 'SS';
+  else if (Game.score >= 6000) currentRank = 'S';
+  else if (Game.score >= 3000) currentRank = 'A';
+  else currentRank = 'B';
 
-  document.getElementById('res-rank-char').innerText = rank;
+  document.getElementById('res-rank-char').innerText = currentRank;
   document.getElementById('res-score').innerText = Game.score;
   document.getElementById('res-loot').innerText = Game.lootCoins;
   document.getElementById('res-combo').innerText = Game.maxCombo + 'x';
@@ -1049,30 +1112,36 @@ function triggerNuclearBomb(e) {
   showToast('💥 量子脉冲核爆清屏！');
 }
 
-// 触控跟随
+/* ============================================================
+   P0 核心特性 1：科学触控偏移防遮挡算法 (TOUCH OFFSET)
+============================================================ */
+const TOUCH_OFFSET_Y = 42; // 让战机保持在手指正上方 42 像素，视野完全开阔！
 let isPointerDown = false;
-function setTargetPos(cx, cy) {
+
+function setTargetPos(cx, cy, isTouch = false) {
   const rect = canvas.getBoundingClientRect();
   Game.player.targetX = cx - rect.left;
-  Game.player.targetY = cy - rect.top;
+  // 关键：触摸时加入 Y 轴偏移，鼠标点击时不偏移
+  const offsetY = isTouch ? TOUCH_OFFSET_Y : 0;
+  Game.player.targetY = (cy - rect.top) - offsetY;
 }
 
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
   if (isGamePaused) return;
   isPointerDown = true;
-  if (e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
+  if (e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY, true);
 }, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
   if (isGamePaused) return;
-  if (isPointerDown && e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY);
+  if (isPointerDown && e.touches[0]) setTargetPos(e.touches[0].clientX, e.touches[0].clientY, true);
 }, { passive: false });
 
 window.addEventListener('touchend', () => { isPointerDown = false; });
-canvas.addEventListener('mousedown', (e) => { if (!isGamePaused) { isPointerDown = true; setTargetPos(e.clientX, e.clientY); } });
-window.addEventListener('mousemove', (e) => { if (!isGamePaused && isPointerDown) setTargetPos(e.clientX, e.clientY); });
+canvas.addEventListener('mousedown', (e) => { if (!isGamePaused) { isPointerDown = true; setTargetPos(e.clientX, e.clientY, false); } });
+window.addEventListener('mousemove', (e) => { if (!isGamePaused && isPointerDown) setTargetPos(e.clientX, e.clientY, false); });
 window.addEventListener('mouseup', () => { isPointerDown = false; });
 
 /* ============================================================
@@ -1117,13 +1186,13 @@ function loop(now) {
     }
   }
 
-  // 战机移动平滑
-  Game.player.x += (Game.player.targetX - Game.player.x) * 0.25;
-  Game.player.y += (Game.player.targetY - Game.player.y) * 0.25;
+  // 战机平滑跟随（并进行屏幕边界限制）
+  Game.player.x += (Game.player.targetX - Game.player.x) * 0.28;
+  Game.player.y += (Game.player.targetY - Game.player.y) * 0.28;
   Game.player.x = Math.max(18, Math.min(canvas.width - 18, Game.player.x));
-  Game.player.y = Math.max(30, Math.min(canvas.height - 40, Game.player.y));
+  Game.player.y = Math.max(30, Math.min(canvas.height - 35, Game.player.y));
 
-  // 浮游僚机角度累加
+  // 浮游僚机角度
   Game.droneAngle += 0.05;
 
   // 连击自然衰减
@@ -1132,7 +1201,7 @@ function loop(now) {
     if (Game.comboTimer <= 0) Game.combo = 0;
   }
 
-  // 武器计时衰减
+  // 武器升级衰减
   if (Game.weaponTimer > 0) {
     Game.weaponTimer--;
     if (Game.weaponTimer <= 0 && !userHasNFT) Game.weaponLevel = 1;
@@ -1202,7 +1271,7 @@ function loop(now) {
     });
   }
 
-  // 更新玩家子弹
+  // 玩家子弹更新
   for (let i = Game.bullets.length - 1; i >= 0; i--) {
     let b = Game.bullets[i];
     b.x += (b.vx || 0);
@@ -1217,13 +1286,12 @@ function loop(now) {
     if (b.y < -15 || b.x < 0 || b.x > canvas.width) Game.bullets.splice(i, 1);
   }
 
-  // Boss 渲染与行为
+  // Boss 渲染与判定
   if (Game.boss) {
     let b = Game.boss;
     if (b.y < b.targetY) b.y += 1.5;
     b.x = canvas.width / 2 + Math.sin(now * 0.002) * (canvas.width * 0.32);
 
-    // 检查二阶段
     if (!b.phase2 && b.hp <= b.maxHp * 0.5) {
       b.phase2 = true;
       Game.shake = 22;
@@ -1233,7 +1301,6 @@ function loop(now) {
       document.getElementById('boss-title-tag').style.color = '#ffaa00';
     }
 
-    // 绘制 Boss
     ctx.save();
     ctx.translate(b.x, b.y);
     ctx.fillStyle = b.phase2 ? '#660022' : '#330b22';
@@ -1249,7 +1316,6 @@ function loop(now) {
     ctx.closePath();
     ctx.fill(); ctx.stroke();
 
-    // 核心光核
     ctx.fillStyle = b.phase2 ? '#ff0000' : '#ffd700';
     ctx.beginPath();
     ctx.arc(0, 5, b.phase2 ? 18 : 14, 0, Math.PI * 2);
@@ -1257,7 +1323,6 @@ function loop(now) {
     ctx.restore();
 
     b.shootTimer++;
-    // 一阶段火炮
     if (!b.phase2 && b.shootTimer % 38 === 0) {
       b.spiralAngle += 0.4;
       for (let k = 0; k < 6; k++) {
@@ -1270,7 +1335,6 @@ function loop(now) {
         });
       }
     }
-    // 二阶段狂暴螺旋弹幕
     if (b.phase2 && b.shootTimer % 22 === 0) {
       b.spiralAngle += 0.55;
       for (let k = 0; k < 8; k++) {
@@ -1284,7 +1348,6 @@ function loop(now) {
       }
     }
 
-    // 子弹命中 Boss
     for (let j = Game.bullets.length - 1; j >= 0; j--) {
       let pb = Game.bullets[j];
       if (Math.hypot(b.x - pb.x, b.y - pb.y) < b.r + 5) {
@@ -1348,7 +1411,6 @@ function loop(now) {
     }
     ctx.restore();
 
-    // 击中敌机
     for (let j = Game.bullets.length - 1; j >= 0; j--) {
       let b = Game.bullets[j];
       if (Math.hypot(e.x - b.x, e.y - b.y) < e.r + 5) {
@@ -1366,7 +1428,6 @@ function loop(now) {
           Game.score += earn;
           addFloatingText(e.x, e.y, `+${earn}`, e.isElite ? '#ff0055' : '#00f0ff');
 
-          // 充能 Fever
           if (!Game.overdrive) {
             Game.feverGauge = Math.min(100, Game.feverGauge + 6);
             if (Game.feverGauge >= 100) {
@@ -1398,7 +1459,6 @@ function loop(now) {
       }
     }
 
-    // 撞机
     if (Math.hypot(e.x - Game.player.x, e.y - Game.player.y) < e.r + Game.player.r) {
       if (Game.overdrive) {
         createExplosion(e.x, e.y, '#ffd700', 14);
@@ -1453,8 +1513,6 @@ function loop(now) {
   // 掉落物 (量子磁暴吸附算法)
   for (let i = Game.drops.length - 1; i >= 0; i--) {
     let d = Game.drops[i];
-
-    // 如果处于过载状态，全图加速吸附；普通状态下进入 90px 范围吸附
     const distToPlayer = Math.hypot(Game.player.x - d.x, Game.player.y - d.y);
     if (Game.overdrive || distToPlayer < 90) {
       const magnetSpeed = Game.overdrive ? 8.5 : 5.0;
@@ -1493,7 +1551,6 @@ function loop(now) {
     }
     ctx.restore();
 
-    // 拾取
     if (distToPlayer < Game.player.r + 14) {
       Haptics.vibrate(25);
       if (d.type === 'token_coin') {
@@ -1558,13 +1615,13 @@ function loop(now) {
     Game.screenFlash -= 0.06;
   }
 
-  // 绘制伴随僚机
+  // 绘制僚机
   if (userHasNFT || Game.weaponLevel > 1) {
     drawWingmanDrone(Game.player.x - 28, Game.player.y + 6);
     drawWingmanDrone(Game.player.x + 28, Game.player.y + 6);
   }
 
-  // 绘制驾驶员战机
+  // 绘制玩家战机
   drawPlayerShip(Game.player.x, Game.player.y);
 
   ctx.restore();
@@ -1589,7 +1646,6 @@ function drawPlayerShip(x, y) {
   ctx.save();
   ctx.translate(x, y);
 
-  // 力场护盾
   if (Game.shield > 40) {
     ctx.strokeStyle = Game.overdrive ? '#ff007f' : (userHasNFT ? '#ffd700' : 'rgba(0, 240, 255, 0.45)');
     ctx.lineWidth = 1.5;
@@ -1598,7 +1654,6 @@ function drawPlayerShip(x, y) {
     ctx.stroke();
   }
 
-  // 尾焰
   ctx.fillStyle = Game.overdrive ? '#00f0ff' : (userHasNFT ? '#ffd700' : '#ff0055');
   ctx.beginPath();
   ctx.moveTo(-5, 12);
@@ -1606,7 +1661,6 @@ function drawPlayerShip(x, y) {
   ctx.lineTo(5, 12);
   ctx.fill();
 
-  // 机身几何
   ctx.fillStyle = Game.overdrive ? '#ff007f' : (userHasNFT ? '#ffd700' : '#00f0ff');
   ctx.shadowColor = ctx.fillStyle;
   ctx.shadowBlur = 12;
@@ -1634,6 +1688,200 @@ function createExplosion(x, y, color, count = 12) {
       life: 1.0
     });
   }
+}
+
+/* ============================================================
+   P0 核心特性 2：赛博战报海报独立渲染引擎 (Canvas Poster Generator)
+============================================================ */
+function generateBattlePoster() {
+  const pCanvas = document.createElement('canvas');
+  pCanvas.width = 640;
+  pCanvas.height = 960;
+  const pCtx = pCanvas.getContext('2d');
+
+  // 1. 深邃赛博网格背景
+  const grad = pCtx.createLinearGradient(0, 0, 0, 960);
+  grad.addColorStop(0, '#090d1a');
+  grad.addColorStop(0.5, '#04060b');
+  grad.addColorStop(1, '#020306');
+  pCtx.fillStyle = grad;
+  pCtx.fillRect(0, 0, 640, 960);
+
+  // 科技网格线
+  pCtx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
+  pCtx.lineWidth = 1;
+  for (let x = 0; x < 640; x += 40) {
+    pCtx.beginPath(); pCtx.moveTo(x, 0); pCtx.lineTo(x, 960); pCtx.stroke();
+  }
+  for (let y = 0; y < 960; y += 40) {
+    pCtx.beginPath(); pCtx.moveTo(0, y); pCtx.lineTo(640, y); pCtx.stroke();
+  }
+
+  // 霓虹装饰外框
+  pCtx.strokeStyle = '#00f0ff';
+  pCtx.lineWidth = 4;
+  pCtx.strokeRect(20, 20, 600, 920);
+
+  pCtx.strokeStyle = '#ff007f';
+  pCtx.lineWidth = 1.5;
+  pCtx.strokeRect(26, 26, 588, 908);
+
+  // 四角科技切角装饰
+  pCtx.fillStyle = '#00f0ff';
+  pCtx.fillRect(16, 16, 12, 12);
+  pCtx.fillRect(612, 16, 12, 12);
+  pCtx.fillRect(16, 932, 12, 12);
+  pCtx.fillRect(612, 932, 12, 12);
+
+  // 顶部 Badge
+  pCtx.fillStyle = '#0052ff';
+  pCtx.beginPath();
+  pCtx.roundRect(40, 48, 140, 28, 6);
+  pCtx.fill();
+  pCtx.fillStyle = '#fff';
+  pCtx.font = 'bold 13px monospace';
+  pCtx.textAlign = 'center';
+  pCtx.fillText('BASE MAINNET', 110, 67);
+
+  // 游戏标题
+  pCtx.textAlign = 'left';
+  pCtx.font = '900 32px sans-serif';
+  pCtx.fillStyle = '#ffffff';
+  pCtx.shadowColor = '#00f0ff';
+  pCtx.shadowBlur = 15;
+  pCtx.fillText('PULSE PIONEER', 40, 125);
+  pCtx.shadowBlur = 0;
+
+  pCtx.font = '12px monospace';
+  pCtx.fillStyle = '#00f0ff';
+  pCtx.fillText('ON-CHAIN COMBAT ARCHIVE // 战绩核定公报', 40, 148);
+
+  // 分隔线
+  pCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+  pCtx.beginPath(); pCtx.moveTo(40, 168); pCtx.lineTo(600, 168); pCtx.stroke();
+
+  // 飞行员地址卡
+  const pilotName = userAccount 
+    ? (userAccount.slice(0, 6) + '...' + userAccount.slice(-4)) 
+    : 'GUEST PILOT';
+  pCtx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+  pCtx.beginPath(); pCtx.roundRect(40, 185, 560, 42, 8); pCtx.fill();
+  pCtx.font = 'bold 14px monospace';
+  pCtx.fillStyle = '#8da2c4';
+  pCtx.fillText('PILOT ID:', 55, 211);
+  pCtx.fillStyle = '#ffd700';
+  pCtx.fillText(pilotName, 145, 211);
+
+  // 中央段位巨幅勋章
+  pCtx.save();
+  pCtx.translate(320, 360);
+
+  // 勋章光环
+  const ringGrad = pCtx.createRadialGradient(0, 0, 40, 0, 0, 110);
+  ringGrad.addColorStop(0, 'rgba(255, 215, 0, 0.25)');
+  ringGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  pCtx.fillStyle = ringGrad;
+  pCtx.beginPath(); pCtx.arc(0, 0, 110, 0, Math.PI * 2); pCtx.fill();
+
+  pCtx.strokeStyle = currentRank === 'SSS' ? '#ff007f' : '#ffd700';
+  pCtx.lineWidth = 4;
+  pCtx.shadowColor = pCtx.strokeStyle;
+  pCtx.shadowBlur = 25;
+  pCtx.beginPath(); pCtx.arc(0, 0, 85, 0, Math.PI * 2); pCtx.stroke();
+  pCtx.shadowBlur = 0;
+
+  // 段位文字
+  pCtx.textAlign = 'center';
+  pCtx.textBaseline = 'middle';
+  pCtx.font = '900 78px monospace';
+  pCtx.fillStyle = '#ffffff';
+  pCtx.shadowColor = pCtx.strokeStyle;
+  pCtx.shadowBlur = 18;
+  pCtx.fillText(currentRank, 0, -4);
+  pCtx.shadowBlur = 0;
+
+  pCtx.font = 'bold 13px sans-serif';
+  pCtx.fillStyle = '#a8b8d0';
+  pCtx.fillText('COMBAT RATING', 0, 52);
+  pCtx.restore();
+
+  // 战绩数据方阵
+  const stats = [
+    { label: 'FINAL SCORE', val: Game.score.toLocaleString(), color: '#00f0ff' },
+    { label: 'LOOT TOKENS', val: `+${Game.lootCoins} $TOKEN`, color: '#ffd700' },
+    { label: 'MAX COMBO', val: `${Game.maxCombo}x STREAK`, color: '#ff007f' },
+    { label: 'NFT FIGHTER', val: userHasNFT ? 'VERIFIED VIP' : 'STANDARD', color: '#00ff66' }
+  ];
+
+  stats.forEach((s, idx) => {
+    const col = idx % 2;
+    const row = Math.floor(idx / 2);
+    const bx = 40 + col * 290;
+    const by = 510 + row * 85;
+
+    pCtx.fillStyle = 'rgba(18, 24, 38, 0.85)';
+    pCtx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+    pCtx.lineWidth = 1;
+    pCtx.beginPath(); pCtx.roundRect(bx, by, 270, 72, 8); pCtx.fill(); pCtx.stroke();
+
+    pCtx.textAlign = 'left';
+    pCtx.font = 'bold 11px monospace';
+    pCtx.fillStyle = '#8da2c4';
+    pCtx.fillText(s.label, bx + 16, by + 28);
+
+    pCtx.font = '900 20px monospace';
+    pCtx.fillStyle = s.color;
+    pCtx.fillText(s.val, bx + 16, by + 56);
+  });
+
+  // 战机机身像素图腾（绘制在海报右下方或中央做水印）
+  pCtx.save();
+  pCtx.translate(320, 740);
+  pCtx.fillStyle = '#00f0ff';
+  pCtx.beginPath();
+  pCtx.moveTo(0, -30);
+  pCtx.lineTo(26, 20);
+  pCtx.lineTo(0, 10);
+  pCtx.lineTo(-26, 20);
+  pCtx.closePath();
+  pCtx.fill();
+  pCtx.restore();
+
+  // 底部网址与链上印章
+  pCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+  pCtx.beginPath(); pCtx.moveTo(40, 810); pCtx.lineTo(600, 810); pCtx.stroke();
+
+  pCtx.textAlign = 'center';
+  pCtx.font = '12px monospace';
+  pCtx.fillStyle = '#8da2c4';
+  pCtx.fillText('SECURED BY BASE SMART CONTRACTS // 真实链上记分存证', 320, 842);
+
+  pCtx.font = 'bold 14px monospace';
+  pCtx.fillStyle = '#00f0ff';
+  pCtx.fillText('https://quantum-genesis.github.io/nft-game/', 320, 872);
+
+  pCtx.font = '11px sans-serif';
+  pCtx.fillStyle = '#64748b';
+  pCtx.fillText('扫码或访问网址，即刻登机空战', 320, 898);
+
+  return pCanvas.toDataURL('image/png');
+}
+
+function showBattlePosterModal() {
+  currentPosterDataUrl = generateBattlePoster();
+  document.getElementById('poster-preview-img').src = currentPosterDataUrl;
+  document.getElementById('poster-modal').style.display = 'flex';
+}
+
+function downloadPosterImage() {
+  if (!currentPosterDataUrl) return;
+  const a = document.createElement('a');
+  a.download = `PulsePioneer_Debrief_${Date.now()}.png`;
+  a.href = currentPosterDataUrl;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('✅ 战报海报已启动下载！');
 }
 
 requestAnimationFrame(loop);
