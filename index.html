@@ -48,10 +48,17 @@
         </button>
       </div>
 
-      <!-- 2. 下注面板（独立在外面了） -->
+      <!-- 2. 下注面板（整合了连接钱包按钮） -->
       <div id="bet-panel" style="margin: 10px 0; padding: 10px; background: rgba(255,215,0,0.05); border: 1px dashed #ffd700; border-radius: 8px; width: 90%; max-width: 300px;">
         <div style="color: #ffd700; font-weight: bold; font-size: 12px; margin-bottom: 8px;">💰 战局下注 (胜则双倍返还)</div>
-        <div style="display: flex; justify-content: space-around;">
+        
+        <!-- 没连钱包时显示 -->
+        <button id="btn-connect-bet" onclick="connectWallet()" style="width: 100%; background: linear-gradient(135deg, #b026ff, #ff007f); color: #fff; border: none; padding: 10px; border-radius: 5px; font-weight: bold; margin-bottom: 8px;">
+          🦊 请先连接钱包
+        </button>
+
+        <!-- 连了钱包后显示 -->
+        <div id="bet-buttons-group" style="display: none; justify-content: space-around;">
           <button class="bet-btn" onclick="selectBet(0)" style="background: #00f0ff; color: #000; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold;">0</button>
           <button class="bet-btn" onclick="selectBet(10)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 5px;">10</button>
           <button class="bet-btn" onclick="selectBet(100)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 5px;">100</button>
