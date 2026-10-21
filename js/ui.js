@@ -19,11 +19,21 @@ function spawnFloatingText(x, y, text, color = '#ffaa00') {
   const el = document.createElement('div');
   el.className = 'floating-text';
   el.textContent = text;
+  el.style.position = 'absolute';
   el.style.left = x + 'px';
   el.style.top = y + 'px';
   el.style.color = color;
   el.style.textShadow = `0 0 5px ${color}, 0 0 10px ${color}`;
+  el.style.fontWeight = 'bold';
+  el.style.fontFamily = 'monospace';
+  el.style.transition = 'all 1s ease-out';
+  el.style.pointerEvents = 'none';
   layer.appendChild(el);
+  
+  requestAnimationFrame(() => {
+    el.style.transform = 'translateY(-50px)';
+    el.style.opacity = '0';
+  });
   setTimeout(() => el.remove(), 1000);
 }
 
@@ -41,30 +51,31 @@ function updateHUD() {
 // ==========================================
 async function connectWallet() {
   if (typeof window.ethereum === 'undefined') {
-    alert('⚠️ 没有检测到钱包环境！请在 MetaMask 或 OKX 钱包的 DApp 浏览器中打开本页面。');
+    alert('请在钱包 DApp 浏览器中打开，或安装 MetaMask！');
     return;
   }
   try {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     State.walletAddress = accounts[0];
+    const btnWallet = document.getElementById('btn-wallet');
+    if (btnWallet) btnWallet.innerText = '🦊 ' + State.walletAddress.slice(0, 5) + '...' + State.walletAddress.slice(-4);
     
-    // 检查 Base 网络
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     if (chainId !== '0x2105') {
       try {
         await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
       } catch (switchError) {
-        if (switchError.code === 4902) alert('请在你的钱包中手动添加 Base 主网');
+        if (switchError.code === 4902) alert('请在钱包中手动添加 Base 主网');
         return;
       }
     }
 
-    document.getElementById('status-wallet').innerText = '读取链上资产中...';
+    const statusWallet = document.getElementById('status-wallet');
+    if (statusWallet) statusWallet.innerText = '读取链上资产中...';
     
     const paddedAddress = State.walletAddress.replace('0x', '').padStart(64, '0');
     const data = '0x70a08231' + paddedAddress;
 
-    // 读取代币
     const tokenRes = await window.ethereum.request({ method: 'eth_call', params: [{ to: CONTRACTS.TOKEN, data: data }, 'latest'] });
     if (tokenRes && tokenRes !== '0x') {
       State.tokenBalance = Math.floor(Number(BigInt(tokenRes) / 10n**18n));
@@ -72,7 +83,6 @@ async function connectWallet() {
       State.tokenBalance = 0;
     }
 
-    // 读取 NFT
     const nftRes = await window.ethereum.request({ method: 'eth_call', params: [{ to: CONTRACTS.NFT, data: data }, 'latest'] });
     State.hasNFT = (nftRes && nftRes !== '0x') ? BigInt(nftRes) > 0n : false;
 
@@ -81,39 +91,34 @@ async function connectWallet() {
     
   } catch (error) {
     console.error(error);
-    alert('读取资产失败，请检查网络');
+    alert('读取资产失败: ' + error.message);
   }
 }
 
-// 统一刷新所有 Web3 相关的 UI
 function updateHangarUI() {
-  // 1. 更新顶部按钮
-  const btnWallet = document.getElementById('btn-wallet');
-  if (btnWallet) {
-    btnWallet.innerText = State.walletAddress ? '🦊 ' + State.walletAddress.slice(0, 5) + '...' + State.walletAddress.slice(-4) : '🦊 连接钱包';
-  }
-
-  // 2. 更新机库状态
   if (State.walletAddress) {
-    document.getElementById('status-wallet').innerText = State.walletAddress.slice(0, 6) + '...' + State.walletAddress.slice(-4);
-    document.getElementById('status-wallet').style.color = '#00ff66';
-    document.getElementById('status-token').innerText = State.tokenBalance;
-    document.getElementById('status-token').style.color = State.tokenBalance > 100 ? '#00ff66' : '#ffd700';
+    const sw = document.getElementById('status-wallet');
+    if(sw) {
+      sw.innerText = State.walletAddress.slice(0, 6) + '...' + State.walletAddress.slice(-4);
+      sw.style.color = '#00ff66';
+    }
+    
+    const st = document.getElementById('status-token');
+    if(st) {
+      st.innerText = State.tokenBalance;
+      st.style.color = State.tokenBalance > 100 ? '#00ff66' : '#ffd700';
+    }
     
     const nftEl = document.getElementById('status-nft');
-    if (State.hasNFT) {
-      nftEl.innerText = '已激活 (开局自带僚机)';
-      nftEl.style.color = '#ffd700';
-    } else {
-      nftEl.innerText = '未持有';
-      nftEl.style.color = '#aaa';
+    if(nftEl) {
+      if (State.hasNFT) {
+        nftEl.innerText = '已激活 (开局自带僚机)';
+        nftEl.style.color = '#ffd700';
+      } else {
+        nftEl.innerText = '未持有';
+        nftEl.style.color = '#aaa';
+      }
     }
-
-    // 3. 解锁下注面板
-    const btnConnect = document.getElementById('btn-connect-bet');
-    const betGroup = document.getElementById('bet-buttons-group');
-    if (btnConnect) btnConnect.style.display = 'none';
-    if (betGroup) betGroup.style.display = 'flex';
   }
 }
 
@@ -128,11 +133,11 @@ async function addTokenToWallet() {
 }
 
 // ==========================================
-// === 下注与领奖逻辑 ===
+// === 下注与领奖 ===
 // ==========================================
 function selectBet(amount) {
   if (!State.walletAddress) {
-    alert("请先点击上方按钮连接钱包！");
+    alert("请先点击右上角的『🦊 连接钱包』！");
     return;
   }
   if (amount > State.tokenBalance) {
@@ -147,11 +152,9 @@ function updateBetButtons(amount) {
   const btns = document.querySelectorAll('.bet-btn');
   btns.forEach(btn => {
     if (btn.innerText == amount) {
-      btn.style.background = '#ffd700';
-      btn.style.color = '#000';
+      btn.style.background = '#ffd700'; btn.style.color = '#000';
     } else {
-      btn.style.background = 'transparent';
-      btn.style.color = '#ffd700';
+      btn.style.background = 'transparent'; btn.style.color = '#ffd700';
     }
   });
 }
@@ -160,7 +163,6 @@ async function claimPrize() {
   if (!window.ethereum || !State.walletAddress) return;
   try {
     document.getElementById('btn-claim').innerText = '交易发送中...';
-    
     const tx = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [{ from: State.walletAddress, to: CONTRACTS.GAME, data: '0x4e71d92d' }]
@@ -194,10 +196,9 @@ function useBomb() {
 function startGame() {
   document.getElementById('screen-start').style.display = 'none';
   document.getElementById('screen-gameover').style.display = 'none';
-  document.getElementById('screen-rogue').classList.remove('show');
+  document.getElementById('screen-rogue').style.display = 'none';
   
   resize(); initStars();
-  
   State.running = true; State.paused = false;
   State.score = 0; State.shield = 100; State.hull = 100; State.bombs = 1;
   State.maxShield = 100; State.maxHull = 100;
@@ -258,18 +259,43 @@ function showGameOver() {
   }
 }
 
+// ==========================================
+// 芯片升级 (防弹终极版)
+// ==========================================
 function checkLevelUp() {
-  State.xp = 0; State.nextXp = Math.floor(State.nextXp * 1.5); State.techLevel++;
+  State.xp = 0; 
+  State.nextXp = Math.floor(State.nextXp * 1.5); 
+  State.techLevel++;
   State.rogueSelecting = true;
+  
   if (State.player) spawnFloatingText(State.player.x, State.player.y - 40, 'LEVEL UP!', '#00f0ff');
+  
   const container = document.getElementById('rogue-cards');
+  if (!container) {
+    State.rogueSelecting = false;
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+  
   container.innerHTML = '';
   const shuffled = [...CHIPS].sort(() => 0.5 - Math.random()).slice(0, 3);
   
   shuffled.forEach(chip => {
     const div = document.createElement('div');
     div.className = 'rogue-card';
-    div.innerHTML = `<div class="rogue-icon">${chip.icon}</div><div><b>${chip.name}</b><br><small>${chip.desc}</small></div>`;
+    // 强制内联样式，确保能看见、能点击
+    div.style.background = '#1e293b';
+    div.style.margin = '10px 0';
+    div.style.padding = '15px';
+    div.style.borderRadius = '8px';
+    div.style.border = '1px solid #00f0ff';
+    div.style.cursor = 'pointer';
+    div.style.display = 'flex';
+    div.style.alignItems = 'center';
+    div.style.gap = '10px';
+    
+    div.innerHTML = `<div style="font-size:24px;">${chip.icon}</div><div><b>${chip.name}</b><br><small style="color:#aaa;">${chip.desc}</small></div>`;
+    
     div.onclick = () => {
       if (chip.id === 'spread') State.activeChips.spread++;
       if (chip.id === 'laser') State.activeChips.laser++;
@@ -279,16 +305,29 @@ function checkLevelUp() {
         State.activeChips.drone++;
         State.drones = [];
         const count = State.activeChips.drone >= 3 ? State.activeChips.drone + 2 : State.activeChips.drone;
-        for (let i = 0; i < count; i++) State.drones.push(new Drone((Math.PI*2/count)*i));
+        for (let i = 0; i < count; i++) {
+          if (typeof Drone !== 'undefined') State.drones.push(new Drone((Math.PI*2/count)*i));
+        }
       }
+      
       checkSynergiesAndEvolutions();
-      document.getElementById('screen-rogue').classList.remove('show');
+      
+      // 强制隐藏弹窗
+      const screenRogue = document.getElementById('screen-rogue');
+      if (screenRogue) screenRogue.style.display = 'none';
+      
       State.rogueSelecting = false;
       requestAnimationFrame(gameLoop);
     };
     container.appendChild(div);
   });
-  document.getElementById('screen-rogue').classList.add('show');
+  
+  // 强制显示弹窗
+  const screenRogue = document.getElementById('screen-rogue');
+  if (screenRogue) {
+    screenRogue.style.display = 'flex';
+    screenRogue.style.zIndex = '9999';
+  }
 }
 
 function checkSynergiesAndEvolutions() {
@@ -300,6 +339,9 @@ function checkSynergiesAndEvolutions() {
   }
 }
 
+// ==========================================
+// 游戏主循环
+// ==========================================
 function gameLoop() {
   if (!State.running || State.paused || State.rogueSelecting) return;
   ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H);
@@ -389,4 +431,4 @@ function move(e) {
   const rect = canvas.getBoundingClientRect();
   State.player.tx = e.clientX - rect.left;
   State.player.ty = e.clientY - rect.top;
-}
+  }
