@@ -12,23 +12,25 @@ function initStars() {
   State.stars = [];
   for (let i = 0; i < 50; i++) State.stars.push({ x: Math.random() * W, y: Math.random() * H, s: Math.random() * 2 + 0.5 });
 }
-// 渲染粒子
-for (let i = State.particles.length - 1; i >= 0; i--) {
-  let p = State.particles[i];
-  p.x += p.vx; p.y += p.vy;
-  p.vy += 0.1; // 模拟一点重力
-  p.life--;
-  ctx.globalAlpha = p.life / p.maxLife;
-  ctx.fillStyle = p.color;
-  ctx.fillRect(p.x, p.y, p.size, p.size);
-  ctx.globalAlpha = 1;
-  if (p.life <= 0) State.particles.splice(i, 1);
-}
+
 function gameLoop() {
   if (!State.running || State.paused || State.rogueSelecting) return;
 
   ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H);
   State.stars.forEach(s => { s.y += s.s; if (s.y > H) s.y = 0; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, 2, 2); });
+
+  // 渲染粒子
+  for (let i = State.particles.length - 1; i >= 0; i--) {
+    let p = State.particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.1; // 模拟一点重力
+    p.life--;
+    ctx.globalAlpha = p.life / p.maxLife;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+    ctx.globalAlpha = 1;
+    if (p.life <= 0) State.particles.splice(i, 1);
+  }
 
   if (State.player) {
     State.player.update(); State.player.draw(ctx);
@@ -48,7 +50,12 @@ function gameLoop() {
       State.shield -= 25;
       if (State.shield < 0) { State.hull += State.shield; State.shield = 0; }
       State.enemyBullets.splice(i, 1);
-      if (State.hull <= 0) { gameOver(); return; }
+      if (State.hull <= 0) { 
+        document.getElementById('res-score').innerText = State.score;
+        document.getElementById('screen-gameover').style.display = 'flex';
+        State.running = false;
+        return; 
+      }
     }
     if (eb.y > H + 30) State.enemyBullets.splice(i, 1);
   }
@@ -66,8 +73,9 @@ function gameLoop() {
       let b = State.bullets[i];
       if (Math.abs(b.x - State.boss.x) < 45 && Math.abs(b.y - State.boss.y) < 30) {
         State.boss.hp -= b.dmg; State.bullets.splice(i, 1);
-        if (State.boss.hp <= 0) { State.score += 1500; 
-                                 // --- 新增：Boss 爆炸特效 ---
+        if (State.boss.hp <= 0) { 
+          State.score += 1500; 
+          // Boss 爆炸特效
           for(let k=0; k<50; k++) {
             State.particles.push({
               x: State.boss.x, y: State.boss.y, 
@@ -77,7 +85,7 @@ function gameLoop() {
             });
           }
           State.boss = null; break; 
-                                }State.boss = null; break; }
+        }
       }
     }
   }
@@ -91,7 +99,7 @@ function gameLoop() {
         if (e.hp <= 0) {
           State.score += 50; State.enemies.splice(i, 1);
           State.xp += 25;
-            // --- 新增：敌机爆炸特效 ---
+          // 敌机爆炸特效
           for(let k=0; k<10; k++) {
             State.particles.push({
               x: e.x, y: e.y, 
@@ -100,9 +108,6 @@ function gameLoop() {
               size: Math.random()*3 + 1, color: '#ff007f'
             });
           }
-          if (State.xp >= State.nextXp) checkLevelUp();
-          break;
-        }
           if (State.xp >= State.nextXp) checkLevelUp();
           break;
         }
