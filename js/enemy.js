@@ -23,8 +23,7 @@ class Boss {
     this.x = W / 2; this.y = -60;
     this.targetY = 90;
     this.hp = 1800; this.maxHp = 1800;
-    this.vx = 2; this.timer = 0;
-    this.phase = 1;
+    this.vx = 2; this.timer = 0; this.phase = 1;
     this.parts = {
       left: { xOff: -32, yOff: 8, hp: 250, destroyed: false, color: '#00f0ff' },
       right: { xOff: 32, yOff: 8, hp: 250, destroyed: false, color: '#ff007f' }
@@ -36,7 +35,6 @@ class Boss {
       this.x += this.vx;
       if (this.x < 60 || this.x > W - 60) this.vx *= -1;
     }
-
     const pct = this.hp / this.maxHp;
     let np = pct <= 0.33 ? 3 : pct <= 0.66 ? 2 : 1;
     if (np !== this.phase) { this.phase = np; this.timer = 0; State.enemyBullets = []; }
@@ -47,14 +45,12 @@ class Boss {
         let p = this.parts[side];
         if (p.destroyed) continue;
         if (Math.hypot(b.x - (this.x + p.xOff), b.y - (this.y + p.yOff)) < 14) {
-          p.hp -= b.dmg;
-          State.bullets.splice(i, 1);
+          p.hp -= b.dmg; State.bullets.splice(i, 1);
           if (p.hp <= 0) { p.destroyed = true; this.hp -= 150; State.score += 300; }
           break;
         }
       }
     }
-
     this.timer++;
     const interval = this.phase === 3 ? 40 : this.phase === 2 ? 50 : 60;
     if (this.timer % interval === 0) {
