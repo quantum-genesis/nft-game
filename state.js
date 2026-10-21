@@ -7,7 +7,7 @@ const State = {
   activeChips: { spread: 0, laser: 0, drone: 0 }, // 加入无人机
   synergies: [], // 激活的羁绊
   evolutions: [], // 进化的武器
-  bullets: [], enemyBullets: [], enemies: [], stars: [], drones: [],
+  bullets: [], enemyBullets: [], enemies: [], stars: [], drones: [],particles: [],
   player: null, boss: null, spawnTimer: 0
 };
 
