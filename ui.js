@@ -1,4 +1,4 @@
-// 用户界面逻辑（HUD、弹窗、按钮交互）
+// ========== 原 ui.js 的内容 ==========
 function updateHUD() {
   document.getElementById('hud-score').innerText = State.score;
   document.getElementById('bomb-count').innerText = State.bombs;
@@ -69,4 +69,25 @@ function checkLevelUp() {
   });
   
   document.getElementById('screen-rogue').classList.add('show');
+}
+
+// ========== 原 main.js 的内容 ==========
+window.addEventListener('load', () => {
+  resize();
+  initStars();
+  ctx.fillStyle = '#05070c'; 
+  ctx.fillRect(0, 0, W, H);
+});
+
+// 连接钱包模拟
+function connectWallet() {
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.request({ method: 'eth_requestAccounts' })
+      .then(acc => {
+        document.getElementById('btn-wallet').innerText = '🦊 ' + acc[0].slice(0, 5) + '...' + acc[0].slice(-4);
+      })
+      .catch(() => alert('连接被拒绝'));
+  } else {
+    alert('请在钱包 DApp 浏览器中打开，或安装 MetaMask');
+  }
 }
