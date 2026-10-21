@@ -33,8 +33,21 @@
     </div>
 
     <div class="overlay" id="screen-start">
-      <h1>PULSE PIONEER IX</h1>
-      <button class="btn primary" onclick="startGame()">🚀 START ENGINE</button>
+  <h1>PULSE PIONEER IX</h1>
+  
+  <!-- 这就是机库面板 -->
+  <div id="hangar-status" style="margin: 15px 0; padding: 10px; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.3); border-radius: 8px; font-size: 12px; color: #a8b8d0; line-height: 1.6; width: 90%; max-width: 300px; text-align: left;">
+    <div style="color: #00f0ff; font-weight: bold; margin-bottom: 5px;">🛸 机库装配状态 (Web3)</div>
+    <div>钱包: <span id="status-wallet" style="color: #fff;">未连接</span></div>
+    <div>代币: <span id="status-token" style="color: #ffd700;">0</span> QDUST</div>
+    <div>NFT: <span id="status-nft" style="color: #aaa;">未持有</span></div>
+    <!-- 添加代币按钮 -->
+    <button onclick="addTokenToWallet()" style="margin-top: 8px; width: 100%; background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+      🦊 将 $QDUST 添加到钱包
+    </button>
+  </div>
+
+  <button class="btn primary" onclick="startGame()">🚀 START ENGINE</button>
     </div>
     <div class="overlay" id="screen-gameover" style="display:none;">
       <h1>MISSION DEBRIEF</h1>
