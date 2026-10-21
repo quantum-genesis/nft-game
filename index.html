@@ -41,6 +41,15 @@
     <div>钱包: <span id="status-wallet" style="color: #fff;">未连接</span></div>
     <div>代币: <span id="status-token" style="color: #ffd700;">0</span> QDUST</div>
     <div>NFT: <span id="status-nft" style="color: #aaa;">未持有</span></div>
+    <!-- 新增：下注面板 -->
+<div id="bet-panel" style="margin: 10px 0; padding: 10px; background: rgba(255,215,0,0.05); border: 1px dashed #ffd700; border-radius: 8px; width: 90%; max-width: 300px;">
+  <div style="color: #ffd700; font-weight: bold; font-size: 12px; margin-bottom: 8px;">💰 战局下注 (胜则双倍返还)</div>
+  <div style="display: flex; justify-content: space-around;">
+    <button class="bet-btn" onclick="selectBet(0)" style="background: #00f0ff; color: #000; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold;">0</button>
+    <button class="bet-btn" onclick="selectBet(10)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 5px;">10</button>
+    <button class="bet-btn" onclick="selectBet(100)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 5px;">100</button>
+  </div>
+</div>
     <!-- 添加代币按钮 -->
     <button onclick="addTokenToWallet()" style="margin-top: 8px; width: 100%; background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px; border-radius: 4px; font-size: 11px; cursor: pointer;">
       🦊 将 $QDUST 添加到钱包
@@ -52,6 +61,14 @@
     <div class="overlay" id="screen-gameover" style="display:none;">
       <h1>MISSION DEBRIEF</h1>
       <p>SCORE: <span id="res-score">0</span></p>
+        <!-- 新增：结算结果展示和领奖按钮 -->
+  <div id="bet-result" style="margin: 15px 0; color: #fff; font-size: 16px; display: none;">
+    本局下注: <span id="res-bet" style="color: #ffd700;">0</span> QDUST<br>
+    结算收益: <span id="res-win" style="color: #00ff66; font-weight: bold;">+0</span> QDUST
+  </div>
+  <button id="btn-claim" style="display: none; background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer;" onclick="claimPrize()">
+    🦊 点击上链领奖
+  </button>
       <button class="btn primary" onclick="startGame()">🔄 RESTART</button>
     </div>
     <div class="overlay" id="screen-rogue">
