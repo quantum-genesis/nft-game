@@ -1,3 +1,10 @@
+// 核心合约配置 (Base 主网)
+// ==========================================
+const CONTRACTS = {
+  NFT: "0xE40285906A9f18B598a3cE4d51B5dEcB4c1d739b",
+  TOKEN: "0xcBa0df1F014b556c44E7DD25a6Db874b6B61b776",
+  GAME: "0x0625E5D6935b621F7f07014faAF73f9c1d388aB6"
+};
 const State = {
   running: false, paused: false, rogueSelecting: false,
   score: 0, techLevel: 1, xp: 0, nextXp: 100,
