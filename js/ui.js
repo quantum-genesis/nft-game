@@ -114,16 +114,33 @@ async function addTokenToWallet() {
 // === 下注与领奖逻辑 ===
 // ==========================================
 function selectBet(amount) {
+  // 如果没连钱包，直接帮玩家拉起连接
   if (!State.walletAddress) {
-    alert("请先连接钱包！");
+    connectWallet().then(() => {
+      // 如果连上了，并且余额够，自动帮玩家选上
+      if (State.walletAddress) {
+        if (amount > State.tokenBalance) {
+          alert("代币余额不足，无法下注该额度！");
+        } else {
+          State.selectedBet = amount;
+          updateBetButtons(amount);
+        }
+      }
+    });
     return;
   }
+
   if (amount > State.tokenBalance) {
     alert("代币余额不足！");
     return;
   }
-  State.selectedBet = amount;
   
+  State.selectedBet = amount;
+  updateBetButtons(amount);
+}
+
+// 把刷新按钮样式的逻辑抽离出来
+function updateBetButtons(amount) {
   const btns = document.querySelectorAll('.bet-btn');
   btns.forEach(btn => {
     if (btn.innerText == amount) {
