@@ -216,6 +216,14 @@ function startGame() {
     State.drones.push(new Drone(0));
     buffText += '🛸 僚机就位 | ';
   }
+  // 【新加这一句】：如果有 NFT，开启极速引擎
+  if (State.hasNFT) {
+  State.speedBuff = 1.2; // 移动速度变成 1.2 倍
+  buffText += '🚀 极速引擎 | ';
+  } else {
+  State.speedBuff = 1;
+}
+
   if (State.tokenBalance > 100) {
     State.maxShield = 150;
     State.shield = 150;
