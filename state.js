@@ -1,3 +1,4 @@
+// ==========================================
 // 核心合约配置 (Base 主网)
 // ==========================================
 const CONTRACTS = {
@@ -5,6 +6,7 @@ const CONTRACTS = {
   TOKEN: "0xcBa0df1F014b556c44E7DD25a6Db874b6B61b776",
   GAME: "0x0625E5D6935b621F7f07014faAF73f9c1d388aB6"
 };
+
 const State = {
   running: false, paused: false, rogueSelecting: false,
   score: 0, techLevel: 1, xp: 0, nextXp: 100,
@@ -13,11 +15,13 @@ const State = {
   activeChips: { spread: 0, laser: 0, drone: 0 },
   synergies: [], evolutions: [],
   bullets: [], enemyBullets: [], enemies: [], stars: [], drones: [], particles: [],
-  player: null, boss: null, spawnTimer: 0
+  player: null, boss: null, spawnTimer: 0,
+  
+  // === Web3 资产与下注状态 ===
+  walletAddress: null,
+  hasNFT: false,
   tokenBalance: 0,
   evadeCooldownEnd: 0,
-  
-  // === 新增：下注状态 ===
   currentBet: 0,      // 本局下注金额
   selectedBet: 0,     // 界面上选中的金额
   winAmount: 0        // 胜利赢得（或输掉）的金额
