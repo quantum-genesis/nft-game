@@ -14,6 +14,13 @@ const State = {
   synergies: [], evolutions: [],
   bullets: [], enemyBullets: [], enemies: [], stars: [], drones: [], particles: [],
   player: null, boss: null, spawnTimer: 0
+  tokenBalance: 0,
+  evadeCooldownEnd: 0,
+  
+  // === 新增：下注状态 ===
+  currentBet: 0,      // 本局下注金额
+  selectedBet: 0,     // 界面上选中的金额
+  winAmount: 0        // 胜利赢得（或输掉）的金额
 };
 
 const CHIPS = [
