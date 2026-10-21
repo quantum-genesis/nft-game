@@ -41,20 +41,20 @@ function updateHUD() {
 // ==========================================
 async function connectWallet() {
   if (typeof window.ethereum === 'undefined') {
-    alert('请在钱包 DApp 浏览器中打开，或安装 MetaMask！');
+    alert('⚠️ 没有检测到钱包环境！请在 MetaMask 或 OKX 钱包的 DApp 浏览器中打开本页面。');
     return;
   }
   try {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     State.walletAddress = accounts[0];
-    document.getElementById('btn-wallet').innerText = '🦊 ' + State.walletAddress.slice(0, 5) + '...' + State.walletAddress.slice(-4);
     
+    // 检查 Base 网络
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     if (chainId !== '0x2105') {
       try {
         await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
       } catch (switchError) {
-        if (switchError.code === 4902) alert('请在钱包中手动添加 Base 主网');
+        if (switchError.code === 4902) alert('请在你的钱包中手动添加 Base 主网');
         return;
       }
     }
@@ -64,6 +64,7 @@ async function connectWallet() {
     const paddedAddress = State.walletAddress.replace('0x', '').padStart(64, '0');
     const data = '0x70a08231' + paddedAddress;
 
+    // 读取代币
     const tokenRes = await window.ethereum.request({ method: 'eth_call', params: [{ to: CONTRACTS.TOKEN, data: data }, 'latest'] });
     if (tokenRes && tokenRes !== '0x') {
       State.tokenBalance = Math.floor(Number(BigInt(tokenRes) / 10n**18n));
@@ -71,6 +72,7 @@ async function connectWallet() {
       State.tokenBalance = 0;
     }
 
+    // 读取 NFT
     const nftRes = await window.ethereum.request({ method: 'eth_call', params: [{ to: CONTRACTS.NFT, data: data }, 'latest'] });
     State.hasNFT = (nftRes && nftRes !== '0x') ? BigInt(nftRes) > 0n : false;
 
@@ -79,16 +81,25 @@ async function connectWallet() {
     
   } catch (error) {
     console.error(error);
-    alert('读取资产失败');
+    alert('读取资产失败，请检查网络');
   }
 }
 
+// 统一刷新所有 Web3 相关的 UI
 function updateHangarUI() {
+  // 1. 更新顶部按钮
+  const btnWallet = document.getElementById('btn-wallet');
+  if (btnWallet) {
+    btnWallet.innerText = State.walletAddress ? '🦊 ' + State.walletAddress.slice(0, 5) + '...' + State.walletAddress.slice(-4) : '🦊 连接钱包';
+  }
+
+  // 2. 更新机库状态
   if (State.walletAddress) {
     document.getElementById('status-wallet').innerText = State.walletAddress.slice(0, 6) + '...' + State.walletAddress.slice(-4);
     document.getElementById('status-wallet').style.color = '#00ff66';
     document.getElementById('status-token').innerText = State.tokenBalance;
     document.getElementById('status-token').style.color = State.tokenBalance > 100 ? '#00ff66' : '#ffd700';
+    
     const nftEl = document.getElementById('status-nft');
     if (State.hasNFT) {
       nftEl.innerText = '已激活 (开局自带僚机)';
@@ -97,6 +108,12 @@ function updateHangarUI() {
       nftEl.innerText = '未持有';
       nftEl.style.color = '#aaa';
     }
+
+    // 3. 解锁下注面板
+    const btnConnect = document.getElementById('btn-connect-bet');
+    const betGroup = document.getElementById('bet-buttons-group');
+    if (btnConnect) btnConnect.style.display = 'none';
+    if (betGroup) betGroup.style.display = 'flex';
   }
 }
 
@@ -114,32 +131,18 @@ async function addTokenToWallet() {
 // === 下注与领奖逻辑 ===
 // ==========================================
 function selectBet(amount) {
-  // 如果没连钱包，直接帮玩家拉起连接
   if (!State.walletAddress) {
-    connectWallet().then(() => {
-      // 如果连上了，并且余额够，自动帮玩家选上
-      if (State.walletAddress) {
-        if (amount > State.tokenBalance) {
-          alert("代币余额不足，无法下注该额度！");
-        } else {
-          State.selectedBet = amount;
-          updateBetButtons(amount);
-        }
-      }
-    });
+    alert("请先点击上方按钮连接钱包！");
     return;
   }
-
   if (amount > State.tokenBalance) {
     alert("代币余额不足！");
     return;
   }
-  
   State.selectedBet = amount;
   updateBetButtons(amount);
 }
 
-// 把刷新按钮样式的逻辑抽离出来
 function updateBetButtons(amount) {
   const btns = document.querySelectorAll('.bet-btn');
   btns.forEach(btn => {
@@ -158,14 +161,9 @@ async function claimPrize() {
   try {
     document.getElementById('btn-claim').innerText = '交易发送中...';
     
-    // ⚠️ 如果你合约里的领奖函数不叫 "claim"，请把下面 data 里的 0x4e71d92d 换成你合约函数的 Hash
     const tx = await window.ethereum.request({
       method: 'eth_sendTransaction',
-      params: [{
-        from: State.walletAddress,
-        to: CONTRACTS.GAME,
-        data: '0x4e71d92d'
-      }]
+      params: [{ from: State.walletAddress, to: CONTRACTS.GAME, data: '0x4e71d92d' }]
     });
     alert("领奖交易已发送！哈希: " + tx.slice(0, 10) + "...");
     document.getElementById('btn-claim').innerText = '✅ 已发送上链';
@@ -199,6 +197,7 @@ function startGame() {
   document.getElementById('screen-rogue').classList.remove('show');
   
   resize(); initStars();
+  
   State.running = true; State.paused = false;
   State.score = 0; State.shield = 100; State.hull = 100; State.bombs = 1;
   State.maxShield = 100; State.maxHull = 100;
@@ -214,15 +213,11 @@ function startGame() {
   if (State.hasNFT) {
     State.activeChips.drone = 1;
     State.drones.push(new Drone(0));
-    buffText += '🛸 僚机就位 | ';
-  }
-  // 【新加这一句】：如果有 NFT，开启极速引擎
-  if (State.hasNFT) {
-  State.speedBuff = 1.2; // 移动速度变成 1.2 倍
-  buffText += '🚀 极速引擎 | ';
+    State.speedBuff = 1.2;
+    buffText += '🛸 僚机就位 | 🚀 极速引擎 | ';
   } else {
-  State.speedBuff = 1;
-}
+    State.speedBuff = 1;
+  }
 
   if (State.tokenBalance > 100) {
     State.maxShield = 150;
