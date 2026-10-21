@@ -36,6 +36,117 @@ function updateHUD() {
   document.getElementById('fill-hull').style.width = hPct + '%';
 }
 
+// ==========================================
+// === 真实 Web3 钱包与资产读取 ===
+// ==========================================
+async function connectWallet() {
+  if (typeof window.ethereum === 'undefined') {
+    alert('请在钱包 DApp 浏览器中打开，或安装 MetaMask！');
+    return;
+  }
+  try {
+    // 1. 请求连接
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    State.walletAddress = accounts[0];
+    document.getElementById('btn-wallet').innerText = '🦊 ' + State.walletAddress.slice(0, 5) + '...' + State.walletAddress.slice(-4);
+    
+    // 2. 切换/检查 Base 主网 (ChainID: 0x2105)
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (chainId !== '0x2105') {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x2105' }],
+        });
+      } catch (switchError) {
+        // 如果用户没有 Base 网络，提示添加
+        if (switchError.code === 4902) {
+          alert('请在钱包中手动添加 Base 主网');
+          return;
+        }
+      }
+    }
+
+    document.getElementById('status-wallet').innerText = '读取链上资产中...';
+    
+    // 3. 真实调用合约读取余额
+    // balanceOf(address) 的函数选择器是 0x70a08231
+    const paddedAddress = State.walletAddress.replace('0x', '').padStart(64, '0');
+    const data = '0x70a08231' + paddedAddress;
+
+    // 读取 $QDUST 余额
+    const tokenRes = await window.ethereum.request({
+      method: 'eth_call',
+      params: [{ to: CONTRACTS.TOKEN, data: data }, 'latest']
+    });
+    // 假设代币精度是 18
+    if (tokenRes && tokenRes !== '0x') {
+      State.tokenBalance = Math.floor(Number(BigInt(tokenRes) / 10n**18n));
+    } else {
+      State.tokenBalance = 0;
+    }
+
+    // 读取 NFT 余额
+    const nftRes = await window.ethereum.request({
+      method: 'eth_call',
+      params: [{ to: CONTRACTS.NFT, data: data }, 'latest']
+    });
+    if (nftRes && nftRes !== '0x') {
+      State.hasNFT = BigInt(nftRes) > 0n;
+    } else {
+      State.hasNFT = false;
+    }
+
+    updateHangarUI();
+    if (State.hasNFT) spawnFloatingText(W/2, H/2, '👑 链上 NFT 已认证', '#ffd700');
+    
+  } catch (error) {
+    console.error(error);
+    alert('读取资产失败，请检查网络或合约地址');
+  }
+}
+
+function updateHangarUI() {
+  if (State.walletAddress) {
+    document.getElementById('status-wallet').innerText = State.walletAddress.slice(0, 6) + '...' + State.walletAddress.slice(-4);
+    document.getElementById('status-wallet').style.color = '#00ff66';
+    document.getElementById('status-token').innerText = State.tokenBalance;
+    document.getElementById('status-token').style.color = State.tokenBalance > 100 ? '#00ff66' : '#ffd700';
+    
+    const nftEl = document.getElementById('status-nft');
+    if (State.hasNFT) {
+      nftEl.innerText = '已激活 (开局自带僚机)';
+      nftEl.style.color = '#ffd700';
+    } else {
+      nftEl.innerText = '未持有';
+      nftEl.style.color = '#aaa';
+    }
+  }
+}
+
+// === 新增：一键添加代币到钱包 ===
+async function addTokenToWallet() {
+  if (!window.ethereum) return;
+  try {
+    await window.ethereum.request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address: CONTRACTS.TOKEN,
+          symbol: 'QDUST',
+          decimals: 18,
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// ==========================================
+// 游戏控制与循环（保持不变）
+// ==========================================
 function togglePause() {
   if (!State.running) return;
   State.paused = !State.paused;
@@ -58,12 +169,26 @@ function startGame() {
   resize(); initStars();
   State.running = true; State.paused = false;
   State.score = 0; State.shield = 100; State.hull = 100; State.bombs = 1;
+  State.maxShield = 100; State.maxHull = 100;
   State.xp = 0; State.techLevel = 1; State.nextXp = 100;
   State.activeChips = { spread: 0, laser: 0, drone: 0 };
   State.synergies = []; State.evolutions = []; State.drones = [];
   State.bullets = []; State.enemies = []; State.boss = null; State.particles = [];
   State.player = new Player(W, H);
   
+  let buffText = '';
+  if (State.hasNFT) {
+    State.activeChips.drone = 1;
+    State.drones.push(new Drone(0));
+    buffText += '🛸 僚机就位 | ';
+  }
+  if (State.tokenBalance > 100) {
+    State.maxShield = 150;
+    State.shield = 150;
+    buffText += '🛡️ 护盾强化 | ';
+  }
+  if (buffText) spawnFloatingText(W/2, H/2, buffText, '#00ff66');
+
   updateHUD();
   requestAnimationFrame(gameLoop);
 }
@@ -110,13 +235,11 @@ function checkSynergiesAndEvolutions() {
   }
 }
 
-// === 核心游戏循环 ===
 function gameLoop() {
   if (!State.running || State.paused || State.rogueSelecting) return;
   ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H);
   State.stars.forEach(s => { s.y += s.s; if (s.y > H) s.y = 0; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, 2, 2); });
 
-  // 粒子渲染
   for (let i = State.particles.length - 1; i >= 0; i--) {
     let p = State.particles[i];
     p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--;
@@ -202,4 +325,4 @@ function move(e) {
   const rect = canvas.getBoundingClientRect();
   State.player.tx = e.clientX - rect.left;
   State.player.ty = e.clientY - rect.top;
-}
+                                                                                                }
