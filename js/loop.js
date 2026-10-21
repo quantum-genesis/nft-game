@@ -12,7 +12,18 @@ function initStars() {
   State.stars = [];
   for (let i = 0; i < 50; i++) State.stars.push({ x: Math.random() * W, y: Math.random() * H, s: Math.random() * 2 + 0.5 });
 }
-
+// 渲染粒子
+for (let i = State.particles.length - 1; i >= 0; i--) {
+  let p = State.particles[i];
+  p.x += p.vx; p.y += p.vy;
+  p.vy += 0.1; // 模拟一点重力
+  p.life--;
+  ctx.globalAlpha = p.life / p.maxLife;
+  ctx.fillStyle = p.color;
+  ctx.fillRect(p.x, p.y, p.size, p.size);
+  ctx.globalAlpha = 1;
+  if (p.life <= 0) State.particles.splice(i, 1);
+}
 function gameLoop() {
   if (!State.running || State.paused || State.rogueSelecting) return;
 
@@ -55,7 +66,18 @@ function gameLoop() {
       let b = State.bullets[i];
       if (Math.abs(b.x - State.boss.x) < 45 && Math.abs(b.y - State.boss.y) < 30) {
         State.boss.hp -= b.dmg; State.bullets.splice(i, 1);
-        if (State.boss.hp <= 0) { State.score += 1500; State.boss = null; break; }
+        if (State.boss.hp <= 0) { State.score += 1500; 
+                                 // --- 新增：Boss 爆炸特效 ---
+          for(let k=0; k<50; k++) {
+            State.particles.push({
+              x: State.boss.x, y: State.boss.y, 
+              vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
+              life: 30 + Math.random()*20, maxLife: 50,
+              size: Math.random()*4 + 2, color: Math.random()>0.5 ? '#ffaa00' : '#ff0055'
+            });
+          }
+          State.boss = null; break; 
+                                }State.boss = null; break; }
       }
     }
   }
@@ -69,6 +91,18 @@ function gameLoop() {
         if (e.hp <= 0) {
           State.score += 50; State.enemies.splice(i, 1);
           State.xp += 25;
+            // --- 新增：敌机爆炸特效 ---
+          for(let k=0; k<10; k++) {
+            State.particles.push({
+              x: e.x, y: e.y, 
+              vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
+              life: 20 + Math.random()*10, maxLife: 30,
+              size: Math.random()*3 + 1, color: '#ff007f'
+            });
+          }
+          if (State.xp >= State.nextXp) checkLevelUp();
+          break;
+        }
           if (State.xp >= State.nextXp) checkLevelUp();
           break;
         }
