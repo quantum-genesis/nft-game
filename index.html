@@ -8,87 +8,86 @@
 </head>
 <body>
   <div id="app">
-    <header>
-      <div class="badge"><span class="dot"></span> BASE MAINNET</div>
+    
+    <!-- ================= 顶部状态栏 ================= -->
+    <header style="padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(11,15,26,0.95); border-bottom: 1px solid rgba(0,82,255,0.35); position: relative; z-index: 100;">
+      <div class="badge" style="display: flex; align-items: center; gap: 5px; font-size: 12px; color: #00f0ff; font-weight: bold;">
+        <span class="dot" style="width: 8px; height: 8px; background: #00ff66; border-radius: 50%; box-shadow: 0 0 5px #00ff66;"></span> BASE MAINNET
+      </div>
       <div class="actions">
-        <button id="btn-wallet" onclick="connectWallet()">🦊 连接钱包</button>
+        <!-- 这个是修好位置的连接钱包按钮 -->
+        <button id="btn-wallet" onclick="connectWallet()" style="background: linear-gradient(135deg, #0052ff, #002d99); color: #fff; border: 1px solid #00f0ff; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer;">
+          🦊 连接钱包
+        </button>
       </div>
     </header>
 
+    <!-- ================= 游戏画布 ================= -->
     <div id="canvas-wrap">
       <canvas id="gameCanvas"></canvas>
       <!-- 飘字特效层 -->
       <div id="fx-layer" style="position: absolute; inset: 0; pointer-events: none; z-index: 6; overflow: hidden;"></div>
       
-      <div id="hud">
-        <div class="top">
+      <div id="hud" style="position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; font-family: monospace; font-weight: bold; color: #00f0ff; z-index: 5; pointer-events: none;">
+        <div>
           <span>SCORE <b id="hud-score">0</b></span>
-          <button class="menu-btn" onclick="togglePause()">≡</button>
+          <div class="vital" style="margin-top: 5px; height: 4px; background: rgba(0,0,0,0.5); width: 100px; position: relative;">
+            <div id="fill-shield" style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: #00f0ff; box-shadow: 0 0 5px #00f0ff;"></div>
+            <div id="fill-hull" style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: #00ff66; box-shadow: 0 0 5px #00ff66;"></div>
+          </div>
         </div>
-        <div class="vital">
-          <div id="fill-shield"></div>
-          <div id="fill-hull"></div>
-        </div>
+        <button class="menu-btn" onclick="togglePause()" style="pointer-events: auto; background: rgba(255,255,255,0.1); border: 1px solid #00f0ff; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">≡</button>
       </div>
-      <button id="btn-bomb" onclick="useBomb()">BOMB <span id="bomb-count">1</span></button>
+      <button id="btn-bomb" onclick="useBomb()" style="position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: #ff0055; border: 2px solid #ffaa00; color: white; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; z-index: 10;">BOMB <span id="bomb-count">1</span></button>
     </div>
 
     <!-- ================= 开始界面 ================= -->
-    <div class="overlay" id="screen-start">
-      <h1>PULSE PIONEER IX</h1>
+    <div class="overlay" id="screen-start" style="position: absolute; inset: 0; background: rgba(5,7,12,0.94); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px 15px; z-index: 25; overflow-y: auto;">
+      <h1 style="text-shadow: 2px 2px 0 #ff007f, -2px -2px 0 #00f0ff; margin-bottom: 20px;">PULSE PIONEER IX</h1>
       
       <!-- 1. 机库面板 -->
-      <div id="hangar-status" style="margin: 10px 0; padding: 10px; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.3); border-radius: 8px; font-size: 12px; color: #a8b8d0; line-height: 1.6; width: 90%; max-width: 300px; text-align: left;">
+      <div id="hangar-status" style="margin: 10px 0; padding: 12px; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.3); border-radius: 8px; font-size: 13px; color: #a8b8d0; line-height: 1.8; width: 100%; max-width: 320px; text-align: left;">
         <div style="color: #00f0ff; font-weight: bold; margin-bottom: 5px;">🛸 机库装配状态 (Web3)</div>
         <div>钱包: <span id="status-wallet" style="color: #fff;">未连接</span></div>
         <div>代币: <span id="status-token" style="color: #ffd700;">0</span> QDUST</div>
         <div>NFT: <span id="status-nft" style="color: #aaa;">未持有</span></div>
-        <button onclick="addTokenToWallet()" style="margin-top: 8px; width: 100%; background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-          🦊 将 $QDUST 添加到钱包
-        </button>
       </div>
 
-      <!-- 2. 下注面板（整合了连接钱包按钮） -->
-      <div id="bet-panel" style="margin: 10px 0; padding: 10px; background: rgba(255,215,0,0.05); border: 1px dashed #ffd700; border-radius: 8px; width: 90%; max-width: 300px;">
-        <div style="color: #ffd700; font-weight: bold; font-size: 12px; margin-bottom: 8px;">💰 战局下注 (胜则双倍返还)</div>
+      <!-- 2. 下注面板 -->
+      <div id="bet-panel" style="margin: 10px 0; padding: 12px; background: rgba(255,215,0,0.05); border: 1px dashed #ffd700; border-radius: 8px; width: 100%; max-width: 320px;">
+        <div style="color: #ffd700; font-weight: bold; font-size: 13px; margin-bottom: 10px; text-align: center;">💰 战局下注 (胜则双倍返还)</div>
         
-        <!-- 没连钱包时显示 -->
-        <button id="btn-connect-bet" onclick="connectWallet()" style="width: 100%; background: linear-gradient(135deg, #b026ff, #ff007f); color: #fff; border: none; padding: 10px; border-radius: 5px; font-weight: bold; margin-bottom: 8px;">
-          🦊 请先连接钱包
-        </button>
-
-        <!-- 连了钱包后显示 -->
-        <div id="bet-buttons-group" style="display: none; justify-content: space-around;">
-          <button class="bet-btn" onclick="selectBet(0)" style="background: #00f0ff; color: #000; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold;">0</button>
-          <button class="bet-btn" onclick="selectBet(10)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 5px;">10</button>
-          <button class="bet-btn" onclick="selectBet(100)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 5px;">100</button>
+        <div id="bet-buttons-group" style="display: flex; justify-content: space-around;">
+          <button class="bet-btn" onclick="selectBet(0)" style="background: #00f0ff; color: #000; border: none; padding: 8px 20px; border-radius: 5px; font-weight: bold; font-size: 14px;">0</button>
+          <button class="bet-btn" onclick="selectBet(10)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 8px 20px; border-radius: 5px; font-size: 14px;">10</button>
+          <button class="bet-btn" onclick="selectBet(100)" style="background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 8px 20px; border-radius: 5px; font-size: 14px;">100</button>
         </div>
       </div>
 
-      <button class="btn primary" onclick="startGame()">🚀 START ENGINE</button>
+      <button class="btn primary" onclick="startGame()" style="margin-top: 10px; width: 100%; max-width: 320px; padding: 14px; border-radius: 8px; border: none; background: linear-gradient(135deg, #00f0ff, #0052ff); color: #050a14; font-size: 16px; font-weight: bold;">🚀 START ENGINE</button>
     </div>
 
     <!-- ================= 结算界面 ================= -->
-    <div class="overlay" id="screen-gameover" style="display:none;">
-      <h1>MISSION DEBRIEF</h1>
-      <p>SCORE: <span id="res-score">0</span></p>
+    <div class="overlay" id="screen-gameover" style="display:none; position: absolute; inset: 0; background: rgba(5,7,12,0.94); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 25; padding: 20px;">
+      <h1 style="color: #ff0055; text-shadow: 2px 2px 0 #fff;">MISSION DEBRIEF</h1>
+      <p style="margin: 15px 0; font-size: 20px;">SCORE: <span id="res-score" style="color: #00f0ff; font-weight: bold;">0</span></p>
       
-      <div id="bet-result" style="margin: 15px 0; color: #fff; font-size: 16px; display: none;">
+      <div id="bet-result" style="margin: 15px 0; color: #fff; font-size: 16px; display: none; text-align: center;">
         本局下注: <span id="res-bet" style="color: #ffd700;">0</span> QDUST<br>
         结算收益: <span id="res-win" style="color: #00ff66; font-weight: bold;">+0</span> QDUST
       </div>
       
-      <button id="btn-claim" style="display: none; background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer;" onclick="claimPrize()">
+      <button id="btn-claim" style="display: none; background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; cursor: pointer; width: 100%; max-width: 320px;" onclick="claimPrize()">
         🦊 点击上链领奖
       </button>
       
-      <button class="btn primary" onclick="startGame()">🔄 RESTART</button>
+      <button class="btn primary" onclick="startGame()" style="width: 100%; max-width: 320px; padding: 14px; border-radius: 8px; border: none; background: linear-gradient(135deg, #00f0ff, #0052ff); color: #050a14; font-size: 16px; font-weight: bold;">🔄 RESTART</button>
     </div>
 
     <!-- ================= 升级界面 ================= -->
-    <div class="overlay" id="screen-rogue">
-      <h2>CHIP MATRIX UPGRADE</h2>
-      <div id="rogue-cards"></div>
+    <div class="overlay" id="screen-rogue" style="position: absolute; inset: 0; background: rgba(4,6,12,0.92); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 40; padding: 20px;">
+      <h2 style="color: #b026ff; margin-bottom: 20px;">CHIP MATRIX UPGRADE</h2>
+      <div id="rogue-cards" style="width: 100%; max-width: 320px;"></div>
     </div>
   </div>
 
