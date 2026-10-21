@@ -1,3 +1,16 @@
+function spawnFloatingText(x, y, text, color = '#ffaa00') {
+  const layer = document.getElementById('fx-layer');
+  if (!layer) return;
+  const el = document.createElement('div');
+  el.className = 'floating-text';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.color = color;
+  el.style.textShadow = `0 0 5px ${color}, 0 0 10px ${color}`;
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
 function updateHUD() {
   document.getElementById('hud-score').innerText = State.score;
   document.getElementById('bomb-count').innerText = State.bombs;
@@ -42,6 +55,8 @@ function startGame() {
 function checkLevelUp() {
   State.xp = 0; State.nextXp = Math.floor(State.nextXp * 1.5); State.techLevel++;
   State.rogueSelecting = true;
+   // --- 新增：升级飘字 ---
+  if (State.player) spawnFloatingText(State.player.x, State.player.y - 40, 'LEVEL UP!', '#00f0ff');
   const container = document.getElementById('rogue-cards');
   container.innerHTML = '';
   const shuffled = [...CHIPS].sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -63,6 +78,14 @@ function checkLevelUp() {
         for (let i = 0; i < count; i++) State.drones.push(new Drone((Math.PI*2/count)*i));
       }
       checkSynergiesAndEvolutions();
+      function checkSynergiesAndEvolutions() {
+  if (State.activeChips.spread >= 3 && !State.evolutions.includes('spread')) State.evolutions.push('spread');
+  if (State.activeChips.laser >= 3 && !State.evolutions.includes('laser')) State.evolutions.push('laser');
+  if (State.activeChips.spread >= 1 && State.activeChips.laser >= 1 && !State.synergies.includes('crossfire')) {
+    State.synergies.push('crossfire');
+    if (State.player) spawnFloatingText(State.player.x, State.player.y - 60, '⚡ 羁绊激活: 交叉火力', '#ffaa00');
+  }
+      }
       document.getElementById('screen-rogue').classList.remove('show');
       State.rogueSelecting = false;
       requestAnimationFrame(gameLoop);
