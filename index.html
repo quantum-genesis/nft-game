@@ -17,7 +17,6 @@
 
     <div id="canvas-wrap">
       <canvas id="gameCanvas"></canvas>
-      
       <div id="hud">
         <div class="top">
           <span>SCORE <b id="hud-score">0</b></span>
@@ -28,7 +27,6 @@
           <div id="fill-hull"></div>
         </div>
       </div>
-
       <button id="btn-bomb" onclick="useBomb()">BOMB <span id="bomb-count">1</span></button>
     </div>
 
@@ -36,21 +34,23 @@
       <h1>PULSE PIONEER IX</h1>
       <button class="btn primary" onclick="startGame()">🚀 START ENGINE</button>
     </div>
-
     <div class="overlay" id="screen-gameover" style="display:none;">
       <h1>MISSION DEBRIEF</h1>
       <p>SCORE: <span id="res-score">0</span></p>
       <button class="btn primary" onclick="startGame()">🔄 RESTART</button>
     </div>
-
     <div class="overlay" id="screen-rogue">
       <h2>CHIP MATRIX UPGRADE</h2>
       <div id="rogue-cards"></div>
     </div>
   </div>
 
+  <!-- 按顺序加载，注意路径加了 js/ -->
   <script src="state.js"></script>
-  <script src="game.js"></script>
-  <script src="ui.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/loop.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
