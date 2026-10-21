@@ -111,7 +111,7 @@ async function addTokenToWallet() {
 }
 
 // ==========================================
-// === 新增：下注与领奖逻辑 ===
+// === 下注与领奖逻辑 ===
 // ==========================================
 function selectBet(amount) {
   if (!State.walletAddress) {
@@ -124,7 +124,6 @@ function selectBet(amount) {
   }
   State.selectedBet = amount;
   
-  // 刷新 UI 按钮样式
   const btns = document.querySelectorAll('.bet-btn');
   btns.forEach(btn => {
     if (btn.innerText == amount) {
@@ -142,15 +141,13 @@ async function claimPrize() {
   try {
     document.getElementById('btn-claim').innerText = '交易发送中...';
     
-    // ⚠️ 注意：这里调用的是合约的领奖函数。
-    // 如果你合约里的领奖函数不叫 "claim"，请把下面 data 里的 0x4e71d92d 换成你合约函数的 Hash
-    // （比如 withdraw() 或 mint() 等等）
+    // ⚠️ 如果你合约里的领奖函数不叫 "claim"，请把下面 data 里的 0x4e71d92d 换成你合约函数的 Hash
     const tx = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [{
         from: State.walletAddress,
-        to: CONTRACTS.GAME, // 兑奖机合约
-        data: '0x4e71d92d'  // 这是 claim() 的函数选择器，如果你没写这个函数，交易会失败，但你可以看到拉起钱包了
+        to: CONTRACTS.GAME,
+        data: '0x4e71d92d'
       }]
     });
     alert("领奖交易已发送！哈希: " + tx.slice(0, 10) + "...");
@@ -194,7 +191,6 @@ function startGame() {
   State.bullets = []; State.enemies = []; State.boss = null; State.particles = [];
   State.player = new Player(W, H);
   
-  // 记录本局下注
   State.currentBet = State.selectedBet;
   
   let buffText = '';
@@ -216,7 +212,6 @@ function startGame() {
   requestAnimationFrame(gameLoop);
 }
 
-// 结算逻辑
 function showGameOver() {
   document.getElementById('res-score').innerText = State.score;
   document.getElementById('screen-gameover').style.display = 'flex';
@@ -226,7 +221,6 @@ function showGameOver() {
     document.getElementById('bet-result').style.display = 'block';
     document.getElementById('res-bet').innerText = State.currentBet;
     
-    // 胜利条件：得分超过 2000 且打死 Boss 算大胜，这里简化为分数 > 2500 算赢
     if (State.score >= 2500) {
       State.winAmount = State.currentBet * 2;
       document.getElementById('res-win').innerText = `+${State.winAmount}`;
@@ -236,7 +230,7 @@ function showGameOver() {
       State.winAmount = -State.currentBet;
       document.getElementById('res-win').innerText = `-${State.currentBet}`;
       document.getElementById('res-win').style.color = '#ff0055';
-      document.getElementById('btn-claim').style.display = 'none'; // 输了不用领奖
+      document.getElementById('btn-claim').style.display = 'none';
     }
   } else {
     document.getElementById('bet-result').style.display = 'none';
@@ -375,4 +369,4 @@ function move(e) {
   const rect = canvas.getBoundingClientRect();
   State.player.tx = e.clientX - rect.left;
   State.player.ty = e.clientY - rect.top;
-    }
+}
