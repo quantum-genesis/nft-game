@@ -5,8 +5,9 @@ class Player {
     this.timer = 0;
   }
   update() {
-    this.x += (this.tx - this.x) * 0.3;
-    this.y += (this.ty - this.y) * 0.3;
+    const speedMult = State.speedBuff || 1;
+  this.x += (this.tx - this.x) * 0.3 * speedMult;
+  this.y += (this.ty - this.y) * 0.3 * speedMult;
     this.timer++;
     if (this.timer >= 7) { this.shoot(); this.timer = 0; }
   }
